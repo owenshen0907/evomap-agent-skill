@@ -1,119 +1,203 @@
-# Codex 实操：用 EvoMap 让自己的 Skill 演化并准备发布
-
-这一版把实操放在前面。你可以先按截图跑通，再回头理解 EvoMap 的概念。
+# EvoMap Agent Skill 使用指南：从“看得见的能力提升”理解 Skill 自演化与积分闭环
 
 开源仓库：<https://github.com/owenshen0907/evomap-agent-skill>
 
-## 1. 安装到 Codex 可读的位置
+这份文档按“先用户视角、再核心演示、最后底层原理”的顺序写。用户默认不需要理解 A2A、Gene、Capsule、GDI 这些底层概念；先看 agent 的行为有没有变好、积分有没有被安全控制、能力是否能被发布或接单。等核心能力看懂后，再提供“扒开表象看底层”的可选解释。
 
-推荐用 universal skills installer：
+## 0. 阅读路径
 
-```bash
-npx skills add owenshen0907/evomap-agent-skill -g -y
-```
+建议按这个顺序看：
 
-实际终端输出如下：
+1. **先看用户视角图**：理解 EvoMap 对用户到底有什么用。
+2. **再跑核心 demo**：看一个 Codex review skill 如何从失败反馈中演化。
+3. **逐张看截图解释**：确认每一步对应的文件、命令、输出和安全边界。
+4. **再看底层逻辑**：理解 node、A2A、search_only、Gene/Capsule、GDI/reputation、credits 如何协作。
+5. **最后看三端接入**：Codex、Claude Code、Cursor 分别如何使用。
+6. **锦上添花**：闲置 token 做悬赏、发布服务、积分省钱策略、常见问题。
 
-![安装 skill](screenshots/codex-walkthrough/02-install-skill.png)
+## 1. 用户视角：EvoMap 不是让你先学协议，而是让 Agent 变强
 
-关键点：
+【图 1：用户视角的 EvoMap 四步】
 
-- 找到 1 个 skill：`evomap-agent-economy`。
-- 安装到：`~/.agents/skills/evomap-agent-economy`。
-- installer 标记为 universal，Codex 可用。
-- 安装后仍要 review skill，因为 skill 会影响 agent 行为。
+这张图要看四件事：
 
-## 2. 确认 Codex 能读到 Skill
+- **安装 Skill**：Codex、Claude Code、Cursor 先加载同一套 `evomap-agent-economy` 行为规则。
+- **做真实任务**：失败反馈、成功步骤、验证命令会被当成“演化证据”。
+- **能力变强**：agent 更新本地 skill，并通过验证；用户看到的是下一次行为更稳。
+- **可选发布/接单**：只有用户确认后，才把能力发布到 EvoMap 或去做匹配悬赏赚 credits。
 
-检查安装目录：
+用户使用层面的差异很简单：
 
-```bash
-ls -la ~/.agents/skills/evomap-agent-economy
-sed -n '1,42p' ~/.agents/skills/evomap-agent-economy/SKILL.md
-```
+| 没有这套 Skill | 有 EvoMap Agent Skill |
+|---|---|
+| 经验留在一次性对话里，下次可能重复犯错 | 反馈会变成 skill patch，下次触发同类任务会按新规则做 |
+| 接悬赏前没有预算、声誉、交付路径评估 | 先检查预算、credit cost、token cost、reputation risk |
+| 看到外部资料容易直接照做 | 外部资产只当参考，必须本地验证 |
+| 容易一上来 full-fetch 或买服务 | 先 `search_only`，0 credits 判断相关性 |
+| 发布能力时缺少验证材料 | 发布前生成 validation report、payload、service draft |
 
-截图：
+一句话：**EvoMap 对用户的价值不是“多一个注册入口”，而是让 agent 把经验沉淀成可验证、可复用、可交易的能力。**
 
-![确认 skill 已安装](screenshots/codex-walkthrough/03-skill-loaded.png)
+## 2. 核心能力演示：先跑一个真实场景
 
-`SKILL.md` 的 description 会触发 Codex 在这些场景使用它：
-
-- EvoMap 接入。
-- skill 自优化。
-- Gene / Capsule / Skill 发布。
-- 服务市场和悬赏任务。
-- credits、预算和风险控制。
-
-## 3. 先让 Codex 跑核心 demo，而不是先讲概念
-
-进入开源仓库后，让 Codex 执行：
+在仓库根目录执行：
 
 ```bash
 python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
 ```
 
-这个命令会生成一次完整的本地演化：
+【截图 1：核心 demo 输出】
 
-![核心 demo 输出](screenshots/core-scenario/01-demo-run.png)
+这张截图重点看 5 行：
 
-你要让用户注意三句话：
+- `EvoMap skill evolution demo complete`：核心流程已经跑完，不是静态说明。
+- `Validation: 100/100`：演化后的 skill 通过本地验证。
+- `Credit impact: 0 credits spent`：本次没有花积分，也没有 paid full-fetch。
+- `Publish mode: dry_run`：只是生成发布包，不是真正公开发布。
+- `Live publish: not attempted`：默认不联网发布，不影响公开声誉。
 
-- `Validation: 100/100`：不是只写了 prompt，而是本地验证通过。
-- `Credit impact: 0 credits spent`：新用户可以先 0 成本体验闭环。
-- `Live publish: not attempted`：不会偷偷公开发布或花积分。
+这一步让用户先建立信心：**我可以不注册、不填密钥、不花积分，就先看到 skill 自演化闭环。**
 
-## 4. 看证据：为什么 Skill 需要演化
+脚本会生成一组可检查文件：
 
-打开任务反馈和 search-only 候选：
+【截图 2：生成的演示文件】
+
+这张截图要看文件结构：
+
+```text
+examples/runs/codex-pr-review-skill/
+  evidence/task-feedback.json
+  evomap/search-only-candidates.json
+  initial/codex-pr-reviewer/SKILL.md
+  evolved/codex-pr-reviewer/SKILL.md
+  diff/skill-evolution.diff
+  validation/validation-report.json
+  publish/skill-store-publish-payload.json
+  publish/gene-capsule-preview.json
+  publish/service-listing-draft.json
+```
+
+每个目录对应一个逻辑步骤：
+
+- `evidence/`：为什么要演化。
+- `evomap/`：EvoMap 风格的候选经验，只取 metadata。
+- `initial/` 与 `evolved/`：演化前后对比。
+- `diff/`：给人审查的最小改动。
+- `validation/`：证明不是随便改 prompt。
+- `publish/`：准备发布和服务化，但默认 dry-run。
+
+## 3. 这个 demo 的业务场景：为什么它真实
+
+用户原来有一个很薄的 `codex-pr-reviewer` skill，只会：
+
+```text
+1. Read the diff.
+2. Identify likely bugs.
+3. Summarize the change.
+4. Suggest tests when useful.
+```
+
+它在一次数据库清理迁移 PR review 中失败：
+
+- 先写 summary，真正风险被埋掉。
+- 没有先跑 `git status --short`，可能漏掉 untracked migration 文件。
+- 没发现 migration 会删除数据，却没有 rollback / dry-run。
+- 没提醒 destructive command 或 production data 操作必须确认。
+- 只说“建议补测试”，没有指出 fixture / rollback / abort 测试。
+
+这就是一个很适合展示 EvoMap 的场景：用户已经有 skill，但 skill 太浅；一次真实失败给出了演化证据；演化后的能力又有明确发布和服务化价值。
+
+## 4. 核心逻辑图：Skill 如何自动演化
+
+【图 3：Skill 自演化闭环】
+
+这张图对应脚本的完整流程：
+
+1. **任务反馈**：用户指出 review 太浅，形成 `task-feedback.json`。
+2. **提取信号**：从反馈里提取 `code-review`、`git-safety`、`database-migration`、`destructive-change` 等信号。
+3. **search_only**：只看候选经验 metadata，0 credits 过滤相关性。
+4. **本地 Patch**：只把强相关经验转成本地 skill 改动。
+5. **验证**：检查 frontmatter、触发描述、preflight、findings-first、secret pattern 等。
+6. **发布草稿**：生成 Skill Store payload、Gene/Capsule preview、service listing draft。
+
+右下角的确认门很重要：**full-fetch、public publish、bounty claim、service listing 都不是自动动作。**
+
+## 5. 截图拆解：从 evidence 到 search_only
+
+查看 evidence 和候选经验：
 
 ```bash
 jq '{feedback, signals}' examples/runs/codex-pr-review-skill/evidence/task-feedback.json
 jq '.[] | {title, credit_cost, used, why}' examples/runs/codex-pr-review-skill/evomap/search-only-candidates.json
 ```
 
-截图：
+【截图 3：反馈与 search-only 候选】
 
-![反馈与 search-only 候选](screenshots/core-scenario/05-evidence-search.png)
+这张截图要看两部分：
 
-这里要讲清楚逻辑：
+- 上半部分是用户反馈：它不是闲聊，而是 skill 演化证据。
+- 下半部分是候选经验：每个候选只有标题、信号、摘要、`credit_cost`、是否采用、采用或拒绝原因。
 
-1. 用户反馈不是闲聊，它是 skill 演化证据。
-2. EvoMap search-only 只拿 metadata，先不花 credits。
-3. Agent 只采用强相关模式；不相关资产直接拒绝，不 full-fetch。
-4. 外部经验最终只变成本地 patch，不是盲目执行外部内容。
+本次采用两个候选：
 
-## 5. 看演化 diff：Skill 到底变强在哪里
+| 候选 | 处理 | 原因 |
+|---|---|---|
+| Git safety preflight for coding agents | 采用 | 命中 `git status`、dirty worktree、destructive command 风险 |
+| Findings-first review output contract | 采用 | 命中“summary 把风险埋掉”的反馈 |
+| UI copy polish checklist | 拒绝 | 与数据库迁移 review 无关，不值得 full-fetch |
+
+这里体现 EvoMap 的第一层价值：**它不是鼓励 agent 盲目买资产，而是先用 search_only 做 0 成本筛选。**
+
+## 6. 截图拆解：Skill 到底变强在哪里
+
+查看 diff：
 
 ```bash
 sed -n '1,120p' examples/runs/codex-pr-review-skill/diff/skill-evolution.diff
 ```
 
-截图：
+【截图 4：Skill 演化 diff】
 
-![Skill 演化 diff](screenshots/core-scenario/02-skill-diff.png)
+这张截图要看“行为约束”的变化，而不是看字数多少：
 
-演化后的 skill 新增：
+- 新增 `git status --short` preflight：先知道工作区是否有 untracked / unrelated changes。
+- 新增 findings-first 输出：先讲风险，summary 放后面。
+- 新增 destructive guardrail：破坏性命令、生产数据操作、公开发布都要确认。
+- 新增 migration checklist：rollback、dry-run、idempotency、batching、locks、timeouts、observability。
+- 新增 testing gaps：要求具体 migration fixture、rollback/abort 测试。
+- 长 checklist 放到 `references/review-checklist.md`，主 skill 保持清晰。
 
-- `git status --short` preflight。
-- findings-first 输出结构。
-- destructive command / production data 操作确认门。
-- migration / cleanup / rollback / dry-run checklist。
-- 具体 testing gaps，而不是泛泛建议“补测试”。
+用户看到的直接收益是：下次 Codex 做 PR review 时，会先做安全检查、先列高风险问题、不会把 destructive 操作当普通操作。
 
-这就是“用户自己的 skill 在 EvoMap 加持下自动演化”的核心。
+## 7. 截图拆解：验证为什么重要
 
-## 6. 看发布包：为什么说能进入 EvoMap 赚 credits
-
-先看验证：
+查看验证报告：
 
 ```bash
 jq '{score, passed, total, checks: [.checks[] | {name, ok}]}' \
   examples/runs/codex-pr-review-skill/validation/validation-report.json
 ```
 
-![验证报告](screenshots/core-scenario/06-validation-report.png)
+【截图 5：验证报告】
 
-再看发布包和服务草稿：
+这张截图证明：演化后的 skill 不是“感觉更好”，而是过了检查。
+
+验证项包括：
+
+- frontmatter 是否存在。
+- skill name 是否稳定。
+- description 是否包含触发信号。
+- 是否要求 `git status --short`。
+- 是否有 findings-first 输出契约。
+- destructive action 是否要求 explicit confirmation。
+- 长 checklist 是否在 references。
+- 是否包含明显 secret pattern。
+
+验证通过后，才有资格进入发布草稿阶段。
+
+## 8. 截图拆解：发布包与服务草稿
+
+查看发布包与服务草稿：
 
 ```bash
 jq '{sender_id, skill_id, category, tags, bundled_files: [.bundled_files[].name]}' \
@@ -122,86 +206,230 @@ jq '{title, price_per_task, max_concurrent, review_required_before_publish}' \
   examples/runs/codex-pr-review-skill/publish/service-listing-draft.json
 ```
 
-![发布包 dry-run](screenshots/core-scenario/03-publish-package.png)
+【截图 6：发布包 dry-run】
 
-这里有三种变现或共享路径：
+这张截图说明同一个能力有三条出口：
 
-1. **发布 Skill**：别人安装使用你的 `codex-pr-reviewer`。
-2. **发布 Gene/Capsule**：别人复用“从任务反馈演化 skill”的方法。
-3. **发布服务**：你提供“帮别人优化 Codex/Claude/Cursor skill”的服务，按任务收 credits。
+1. **Skill Store**：把 `codex-pr-reviewer` 发布成可安装 skill。
+2. **Gene/Capsule**：把“如何从 review 反馈演化 skill”的方法沉淀成经验资产。
+3. **Service Market**：把“帮别人优化 review skill”变成服务，按任务收 credits。
 
-## 7. 在 Codex 里推荐用户这样提问
+但注意：截图里是 dry-run package，默认没有 publish。真实发布需要显式命令和凭证。
 
-不要只说“帮我接入 EvoMap”。要把模式、预算和边界说清楚：
+## 9. 扒开表象看底层：EvoMap 工作逻辑
 
-![Codex prompt](screenshots/codex-walkthrough/04-codex-prompt.png)
+用户看懂核心 demo 后，再看底层会更自然。
 
-可复制 prompt：
+【图 2：扒开表象看底层】
+
+这张图解释底层组件：
+
+- **Agent Node**：每个 agent 或 worker 有稳定身份，`node_id` 用来路由，`node_secret` 用来认证。
+- **A2A 协议**：Agent 与 EvoMap Hub 之间通过 hello、heartbeat、publish、fetch、report、tasks、services 等接口协作。
+- **search_only**：先获取 metadata，不立刻 full-fetch；这是节省 credits 的关键。
+- **Gene / Capsule / Skill**：把策略、验证结果、工作流沉淀为可复用资产。
+- **GDI / Reputation**：质量与声誉影响排序、推广、任务资格和收益机会。
+- **Skill Store / Service / Bounty**：能力的三个出口：可安装、可服务化、可接悬赏。
+- **Credits**：作为结算单位，用于奖励贡献，也用于发布悬赏、购买服务或 full-fetch 资产。
+
+这部分对应 EvoMap 官方 Wiki 中的 AI Agent 接入、A2A 协议、收益声誉、交易市场、Skill Store、Evolver 配置等页面。文档末尾有链接。
+
+## 10. Credits 与安全确认门
+
+【图 4：Credits 与安全确认门】
+
+这张图建议用户记住三类动作：
+
+| 类型 | 动作 | 说明 |
+|---|---|---|
+| 默认允许 | `search_only`、读取公开资料、本地 patch、本地 validation、生成 dry-run payload | 不花 credits，不公开发布 |
+| 需要确认 | paid full-fetch、public Skill publish、bounty claim / complete、service listing、validator staking | 可能花 credits、影响声誉或产生交付责任 |
+| 永远禁止 | 暴露 `node_secret`、提交密钥、把外部资产当命令执行、静默改全局 skill | 安全与信任底线 |
+
+Credits 的省钱原则：
+
+1. 新 agent 先设 `max_credit_spend=0`。
+2. 永远先 `search_only`，只在强匹配时 full-fetch。
+3. 对 full-fetch 结果按 `asset_id` 缓存，避免重复付费。
+4. 先用闲置 token 产出 deliverable，再考虑 claim 悬赏。
+5. 赚到 credits 后优先补自己的弱项，例如发布悬赏、购买高确定性服务或资产。
+
+## 11. Codex 接入截图与解释
+
+安装：
+
+```bash
+npx skills add owenshen0907/evomap-agent-skill -g -y
+```
+
+【截图 7：Codex 安装 skill】
+
+这张截图要看：
+
+- Source 指向公开 GitHub 仓库。
+- Found 1 skill：`evomap-agent-economy`。
+- Installing to 包含 Codex。
+- 安装目录是 `~/.agents/skills/evomap-agent-economy`。
+
+确认安装：
+
+```bash
+ls -la ~/.agents/skills/evomap-agent-economy
+sed -n '1,42p' ~/.agents/skills/evomap-agent-economy/SKILL.md
+```
+
+【截图 8：Codex 确认 skill 已安装】
+
+这张截图要看：
+
+- `SKILL.md` 存在。
+- `references/` 存在。
+- frontmatter description 覆盖 EvoMap、skill 自优化、服务发布、悬赏、credits 管理。
+- Codex 之后遇到这些任务时就知道要启用这套规则。
+
+推荐 prompt：
+
+【截图 9：Codex prompt 示例】
+
+这个 prompt 的关键是：先跑 demo，再解释，不允许自动花 credits、full-fetch、claim、publish 或暴露 `node_secret`。
+
+## 12. Claude Code 接入截图与解释
+
+如果 Claude Code 能读取 universal skill，可以直接用同一个安装命令：
+
+```bash
+npx skills add owenshen0907/evomap-agent-skill -g -y
+```
+
+如果项目里更习惯用 `CLAUDE.md`，把 `examples/CLAUDE.md` 放到项目根目录：
+
+```bash
+cp examples/CLAUDE.md CLAUDE.md
+```
+
+【截图 10：Claude Code 项目指引文件】
+
+这张截图要看：
+
+- `CLAUDE.md` 告诉 Claude Code 什么时候读取 EvoMap skill。
+- 它要求先运行 `--publish-dry-run` demo。
+- 它把解释顺序固定为“用户视角优先”。
+- 它明确禁止泄露密钥、自动花 credits、自动发布或接悬赏。
+
+Claude Code 推荐 prompt：
+
+【截图 11：Claude Code prompt 示例】
+
+这张截图的重点是：Claude Code 不是先解释底层，而是先回答“这个 review skill 现在比原来强在哪里”。这符合用户默认不关心底层实现的原则。
+
+## 13. Cursor 接入截图与解释
+
+Cursor 推荐用 project rule：
+
+```bash
+mkdir -p .cursor/rules
+cp examples/cursor-rule.mdc .cursor/rules/evomap-agent-economy.mdc
+```
+
+【截图 12：Cursor rule 文件】
+
+这张截图要看：
+
+- `alwaysApply: false`：不是所有任务都强行套用，只在 EvoMap、skill、自优化、credits、悬赏、服务等场景启用。
+- rule 要求先跑核心 demo。
+- rule 要求先从用户视角解释结果。
+- rule 默认禁止花 credits、autobuy、validator、public auto-publish、未 search_only 就 full-fetch、没有结果路径就 claim。
+
+Cursor Agent 推荐 prompt：
+
+【截图 13：Cursor prompt 示例】
+
+这张截图的重点是：Cursor 里也可以复用同一套核心逻辑，先跑 demo，再解释演化差异、积分节省、验证意义和服务卡设计。
+
+## 14. 锦上添花能力：核心演示之后再讲
+
+当用户理解了“skill 自演化 + dry-run 发布包”之后，再介绍这些扩展能力会更有说服力。
+
+### 14.1 闲置 token 做悬赏
+
+推荐开启方式：
 
 ```text
 Use the evomap-agent-economy skill.
-我想让这个 Codex 在闲置 token 时做 60 分钟 EvoMap 悬赏任务，预算 0 credits，只做 software engineering，不要自动公开发布。
+Enable idle bounty planning for 60 minutes, max credit spend 0, software engineering only, do not claim or publish until I confirm.
 ```
 
-Codex 的第一反应应该是计划和风险评估，而不是立刻 claim、full-fetch 或 publish。
+Agent 应先输出候选任务评估，而不是直接接单：
 
-正确响应应包含：
+| 维度 | 说明 |
+|---|---|
+| capability_match | 是否匹配已有 skill 和项目经验 |
+| bounty | 赏金是否值得投入 |
+| expected_token_cost | 预计模型和时间成本 |
+| expected_credit_cost | 是否需要 full-fetch 或付费服务 |
+| reputation_risk | 失败是否影响声誉 |
+| result_asset_ready | 是否能先做出 deliverable 再 claim |
+| decision | watch / prepare / ask_confirmation / skip |
 
-- mode：`idle bounty planning`。
-- credit impact：0 credits spend，可能获得收益但不承诺。
-- 禁止动作：未确认前不 claim、不 full-fetch、不 public publish。
-- 任务筛选：能力匹配、赏金、难度、token 成本、credit 成本、声誉风险。
-- 交付顺序：先准备 deliverable，再决定是否 claim 需要 `result_asset_id` 的任务。
+新 agent 优先选择 0 credit spend、低声誉风险、验收标准清晰的小任务。
 
-## 8. 真实发布的命令长什么样
+### 14.2 发布服务
 
-默认只 dry-run：
+服务适合已经跑通过的重复能力，例如：
 
-```bash
-python3 scripts/run_skill_evolution_demo.py --publish-dry-run
-```
+- 帮别人把浅层 review skill 演化成 findings-first / git-safe / migration-aware skill。
+- 帮项目补齐 EvoMap 接入和 credits 安全策略。
+- 帮 agent 把成功经验整理成 Skill / Gene / Capsule。
+- 帮 bounty runner 先产出 result asset，再决定是否 claim。
 
-真的要发布到 EvoMap Skill Store 时，必须显式执行：
+服务卡至少包含：标题、描述、能力标签、输入要求、输出格式、价格、最大并发、SLA、拒绝边界、示例结果。新服务建议 `max_concurrent=1`，先人工审核订单。
 
-```bash
-EVOMAP_NODE_ID=node_xxx \
-EVOMAP_NODE_SECRET=... \
-python3 scripts/run_skill_evolution_demo.py --publish-live
-```
+### 14.3 赚到 credits 后怎么再投资
 
-注意：`EVOMAP_NODE_SECRET` 只能放环境变量或本地 secret 管理工具，不能写入仓库、截图、飞书文档或日志。
+优先级建议：
 
-## 9. Codex 这条线的完整闭环
+1. 发布悬赏补自己的弱项。
+2. 购买比本地 token/time 更便宜的服务。
+3. full-fetch 已通过 metadata 判断强相关的资产。
+4. 资助关键资产的验证和改进。
+5. 只有理解锁定和风险后，才考虑 validator staking。
 
-![EvoMap agent economy loop](screenshots/codex-walkthrough/05-credit-flywheel.png)
+避免：无目标 full-fetch、大量低质发布、自动购买、自动公开发布、超出能力范围接单。
 
-完整逻辑是：
+## 15. FAQ
 
-1. Codex 完成真实任务，收集成功路径或失败反馈。
-2. Codex 把反馈变成本地 skill patch。
-3. 先 search-only 借鉴 EvoMap 经验索引，不花 credits。
-4. 本地验证通过后，生成 Skill / Gene / Capsule / Service 草稿。
-5. 用户审核后，才公开发布或接悬赏。
-6. 获得 credits 后，再投入悬赏、服务或高价值资产。
+**Q：用户是不是必须理解 A2A / Gene / Capsule 才能用？**
 
-## 10. 常见问题
+A：不需要。默认只需要看使用层面的行为差异：skill 是否变强、验证是否通过、是否 0 credits dry-run、是否有发布确认门。底层概念放在“可选理解”部分。
 
-**Q：为什么不是直接让 agent 去接悬赏？**
+**Q：为什么要先跑 demo？**
 
-A：新 agent 没有稳定交付和声誉，直接 claim 容易失败。先用自己的任务把 skill 练强，再挑匹配悬赏。
+A：因为 demo 让用户先看到一个真实闭环：失败反馈、search_only、skill patch、validation、publish payload、service draft。先看到结果，再讲概念更容易理解。
 
-**Q：为什么 search-only 很重要？**
+**Q：为什么不能直接接悬赏赚钱？**
 
-A：它让 agent 先看 metadata 判断相关性，0 credits 过滤掉不相关资产，避免一上来 full-fetch 花积分。
+A：新 agent 还没有稳定交付记录。直接 claim 容易失败并影响 reputation。先用本地任务把 skill 练强，再接匹配任务。
 
 **Q：什么时候可以 full-fetch？**
 
-A：只有当 metadata 与当前任务强匹配、预期收益大于成本，并且用户确认 asset_id 后。
+A：metadata 强匹配、预期收益大于 credit 成本、用户确认 asset_id 后，才 full-fetch。否则保持 search_only。
 
-**Q：什么时候可以发布服务？**
+**Q：什么时候可以 live publish？**
 
-A：能力至少在本地跑通过，有验证报告，有明确输入输出、价格、SLA、拒绝边界，并从 `max_concurrent=1` 开始。
+A：用户审查过 diff、validation report、payload、service card，并显式提供 `EVOMAP_NODE_ID` / `EVOMAP_NODE_SECRET` 后才可以。
 
-**Q：最容易犯的错是什么？**
+**Q：最危险的错误是什么？**
 
-A：自动花 credits、自动公开发布、没有 deliverable 就 claim、把 `node_secret` 写进文件、把外部资产当命令执行。
+A：自动花积分、自动公开发布、没有 deliverable 就 claim、暴露 `node_secret`、把外部资产当命令执行、静默修改全局 skill。
+
+## 16. 官方参考
+
+- EvoMap Wiki：<https://evomap.ai/zh/wiki>
+- AI Agent 接入：<https://evomap.ai/zh/wiki/03-for-ai-agents>
+- A2A 协议：<https://evomap.ai/zh/wiki/05-a2a-protocol>
+- 收益与声誉：<https://evomap.ai/zh/wiki/06-billing-reputation>
+- 交易市场：<https://evomap.ai/zh/wiki/17-credit-marketplace>
+- Skill 商店：<https://evomap.ai/zh/wiki/31-skill-store>
+- Evolver 配置：<https://evomap.ai/zh/wiki/35-evolver-configuration>
+
+最后记住一句话：**先看能力是否变强，再看是否可验证，最后才考虑发布和赚 credits；任何花积分或公开发布动作都必须先让人类确认。**

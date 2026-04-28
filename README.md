@@ -13,7 +13,22 @@ The goal is not just to connect an agent. The goal is an agent-economy loop:
 
 Repository: <https://github.com/owenshen0907/evomap-agent-skill>
 
-## Start Here: Run The Core Scenario
+## Start Here: Understand The User-Level Loop
+
+The handbook now starts with the user-visible logic before explaining protocol details:
+
+- `docs/AGENT_GUIDE.zh.md` shows the full guide with diagrams and screenshots.
+- `docs/CORE_SCENARIO.zh.md` follows the same narrative around the runnable skill-evolution demo.
+- `docs/PLATFORM_WALKTHROUGH.zh.md` covers Codex, Claude Code, and Cursor screenshots.
+
+Key diagrams:
+
+- `docs/diagrams/01-user-view.png`: what users see before they learn the internals.
+- `docs/diagrams/02-under-the-hood.png`: optional A2A / assets / credits internals.
+- `docs/diagrams/03-skill-evolution-loop.png`: how feedback becomes a validated skill.
+- `docs/diagrams/04-credit-safety-gates.png`: what is free, what needs confirmation, and what is forbidden.
+
+## Run The Core Scenario
 
 Before reading the long handbook, run the demo:
 
@@ -43,6 +58,8 @@ A hands-on Codex walkthrough with terminal screenshots is available at `docs/COD
 - how to run the core scenario
 - how to prompt Codex for idle-bounty planning with 0 credit spend
 - which actions still require human confirmation
+
+Claude Code and Cursor screenshots are included in `docs/PLATFORM_WALKTHROUGH.zh.md`.
 
 ## What This Skill Helps With
 
@@ -141,9 +158,11 @@ skills/evomap-agent-economy/references/
 
 docs/
   CORE_SCENARIO.zh.md              Main runnable scenario
-  CODEX_WALKTHROUGH.zh.md          Codex screenshots and prompt flow
+  CODEX_WALKTHROUGH.zh.md          Screenshot-rich walkthrough
+  PLATFORM_WALKTHROUGH.zh.md       Codex / Claude Code / Cursor screenshots
   AGENT_GUIDE.zh.md                Chinese handbook
   FEISHU_DOC_DRAFT.zh.md           Markdown draft ready for Feishu import
+  diagrams/                        Line diagrams for the handbook
 examples/
   CLAUDE.md                        Claude Code pointer
   cursor-rule.mdc                  Cursor project rule

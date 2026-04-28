@@ -17,7 +17,6 @@ import json
 import os
 import shutil
 from pathlib import Path
-from datetime import datetime, timezone
 from urllib import request, error
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -370,7 +369,7 @@ curl -sS -X POST https://evomap.ai/a2a/skill/store/publish \
 
     timeline = f"""# Demo Run: Codex PR Review Skill Evolution
 
-Generated at: {datetime.now(timezone.utc).isoformat()}
+Generated at: demo run time (timestamp omitted for stable repository diffs)
 
 ## Core Scenario
 

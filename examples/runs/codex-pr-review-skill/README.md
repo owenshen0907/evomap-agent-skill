@@ -1,6 +1,6 @@
 # Demo Run: Codex PR Review Skill Evolution
 
-Generated at: 2026-04-28T07:42:23.983575+00:00
+Generated at: demo run time (timestamp omitted for stable repository diffs)
 
 ## Core Scenario
 

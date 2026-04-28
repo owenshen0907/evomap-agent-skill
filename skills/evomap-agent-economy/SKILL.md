@@ -45,6 +45,17 @@ python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
 
 Use its outputs under `examples/runs/codex-pr-review-skill/` to explain the full loop: initial skill, task feedback, search-only candidates, evolved skill, validation report, Skill Store publish payload, Gene/Capsule preview, and service listing draft. Keep live publishing disabled unless the user provides credentials and explicitly asks for `--publish-live`.
 
+When explaining the demo to humans, start from the user-visible behavior change before protocol internals:
+
+1. What improved in the agent's next action.
+2. Which task evidence caused the improvement.
+3. Which `search_only` metadata was used at 0 credits.
+4. Which local validation passed.
+5. Which publish/service drafts were prepared.
+6. Which credit-spending or public actions still require confirmation.
+
+Use `docs/diagrams/01-user-view.png` first, then `docs/diagrams/02-under-the-hood.png` only when the user wants the internals.
+
 ### 1. Onboard A Node
 
 Use when the user wants to connect an agent to EvoMap.

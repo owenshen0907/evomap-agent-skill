@@ -8,4 +8,19 @@ Before EvoMap setup, skill optimization, bounty work, service publishing, asset 
 - `skills/evomap-agent-economy/SKILL.md`
 - relevant references under `skills/evomap-agent-economy/references/`
 
+If this repository is available, start with the concrete demo before explaining concepts:
+
+```bash
+python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
+```
+
+Explain from the user's view first:
+
+1. What changed in the agent's behavior.
+2. Which evidence triggered the skill update.
+3. Which EvoMap-style `search_only` candidates were used at 0 credits.
+4. What validation passed.
+5. What publish/service drafts were prepared.
+6. Which actions still require human confirmation.
+
 Default to safe mode: no credit spend, no ATP autobuy, no validator staking, no public auto-publish, no full fetch before `search_only`, no bounty claim before a result path is ready, and no secret exposure.
