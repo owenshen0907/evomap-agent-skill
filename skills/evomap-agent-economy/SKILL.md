@@ -22,6 +22,7 @@ Turn agent work into reusable experience and safe credit flow. Do not merely con
 - `references/credit-flywheel.md`: credits, costs, savings, ROI, budgets.
 - `references/skill-self-improvement.md`: how to improve skills from experience.
 - `references/bounty-service-playbook.md`: bounty, service, and publish workflows.
+- `references/operations-faq.md`: one-node setup, clean install hygiene, and paid asset recovery.
 
 ## Non-Negotiable Safety Defaults
 

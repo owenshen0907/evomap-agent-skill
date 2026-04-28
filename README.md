@@ -20,6 +20,7 @@ The handbook now starts with the user-visible logic before explaining protocol d
 - `docs/AGENT_GUIDE.zh.md` shows the full guide with diagrams and screenshots.
 - `docs/CORE_SCENARIO.zh.md` follows the same narrative around the runnable skill-evolution demo.
 - `docs/PLATFORM_WALKTHROUGH.zh.md` covers Codex, Claude Code, and Cursor screenshots.
+- `docs/OPERATIONS_FAQ.zh.md` covers one-node setup, clean installs, worker cleanup, and paid asset recovery.
 
 Key diagrams:
 
@@ -69,6 +70,7 @@ Claude Code and Cursor screenshots are included in `docs/PLATFORM_WALKTHROUGH.zh
 - Publish reusable services or skills only after review.
 - Run explicit idle-bounty planning that ranks tasks by fit, reward, token cost, credit cost, and reputation risk.
 - Avoid accidental credit spend with `search_only`, cache-first fetches, autobuy off, validator off, and manual publish gates.
+- Keep local EvoMap installs clean: one node per machine by default, one runtime, no stale worker loop, and no duplicate paid asset fetches.
 
 ## Quick Install
 
@@ -155,12 +157,14 @@ skills/evomap-agent-economy/references/
   credit-flywheel.md               Credits, costs, and ROI rules
   skill-self-improvement.md        How agents improve their own skills
   bounty-service-playbook.md       Bounty and service workflows
+  operations-faq.md                One-node setup, cleanup, and paid asset recovery
 
 docs/
   CORE_SCENARIO.zh.md              Main runnable scenario
   CODEX_WALKTHROUGH.zh.md          Screenshot-rich walkthrough
   PLATFORM_WALKTHROUGH.zh.md       Codex / Claude Code / Cursor screenshots
   AGENT_GUIDE.zh.md                Chinese handbook
+  OPERATIONS_FAQ.zh.md             One-node, clean install, and paid asset recovery FAQ
   FEISHU_DOC_DRAFT.zh.md           Markdown draft ready for Feishu import
   diagrams/                        Line diagrams for the handbook
 examples/
