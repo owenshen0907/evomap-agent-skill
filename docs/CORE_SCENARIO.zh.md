@@ -1,263 +1,225 @@
-# 核心场景：Codex Skill 在 EvoMap 加持下自动演化并准备发布
+# 核心场景：自己的 Skill 自动演化，并准备发布到 EvoMap
 
-这份手册的主线应该围绕一个真实可跑通的场景，而不是抽象介绍。我们选择的核心场景是：
+这份手册先不讲一堆概念，先跑一个可以复现的场景。跑完以后，用户会直观看到：
 
-> 用户有一个自己的 Codex review skill。它在一次数据库清理迁移的 PR review 中漏掉了风险。Codex 收集用户反馈，借鉴 EvoMap 的 search-only metadata 思路，不花 credits 地找到可复用模式，然后自动演化这个 skill，验证通过后生成 EvoMap Skill Store 发布包、Gene/Capsule 预览和服务市场草稿。用户确认后，才真正发布到 EvoMap 赚取积分或提供服务。
+- 自己已有的 Codex skill 如何从一次失败任务里变强。
+- EvoMap 在中间提供的不是“神奇 prompt”，而是经验索引、资产发布、服务市场、悬赏和 credits 激励。
+- 演化后的 skill 如何在本地验证，再生成 Skill Store 发布包、Gene/Capsule 预览和服务草稿。
+- 哪些动作是免费的，哪些动作必须等用户确认后才可能花 credits 或公开发布。
 
-这个场景同时覆盖四件最重要的事：
+## 先跑起来
 
-1. 用户自己的 skill 能从真实任务反馈中演化。
-2. EvoMap 的作用不是“替你写 prompt”，而是给经验共享、资产发布、声誉和 credits 提供基础设施。
-3. 演化后的 skill 可以被打包发布到 EvoMap Skill Store。
-4. 同一个能力还可以包装成服务，后续通过服务订单、悬赏任务或资产复用赚取 credits。
-
-## 为什么选择这个场景
-
-`codex-pr-reviewer` 是一个很适合作为演示的 skill：
-
-- Codex 用户都能理解 code review。
-- 失败模式真实：review 太浅、先写 summary、漏掉迁移风险、没检查 git 状态。
-- 演化结果明确：加入 git preflight、findings-first、destructive-change guardrail、migration checklist。
-- 不需要真实 EvoMap 凭证也能 dry-run 跑通全流程。
-- 有真实变现路径：PR review skill evolution 可以发布成 Skill，也能包装成 “帮你优化 Codex skill / review workflow” 服务。
-
-## 一键跑通核心流程
-
-在仓库根目录运行：
+在开源仓库根目录执行：
 
 ```bash
-python3 scripts/run_skill_evolution_demo.py --clean
+python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
 ```
 
-实际输出会生成：
+截图 1 是实际终端输出。注意它明确写了：`0 credits spent`、`0 paid full-fetches`、`Live publish: not attempted`。
+
+![核心脚本跑通](screenshots/core-scenario/01-demo-run.png)
+
+脚本会生成这组文件：
+
+![生成的演示文件](screenshots/core-scenario/04-generated-files.png)
+
+最重要的文件是：
 
 ```text
 examples/runs/codex-pr-review-skill/
-  initial/codex-pr-reviewer/SKILL.md
-  evidence/task-feedback.json
-  evomap/search-only-candidates.json
-  evolved/codex-pr-reviewer/SKILL.md
+  evidence/task-feedback.json                     # 用户反馈，也就是演化证据
+  evomap/search-only-candidates.json              # EvoMap 风格的 search-only 候选资产
+  initial/codex-pr-reviewer/SKILL.md              # 演化前 skill
+  evolved/codex-pr-reviewer/SKILL.md              # 演化后 skill
   evolved/codex-pr-reviewer/references/review-checklist.md
-  diff/skill-evolution.diff
-  validation/validation-report.json
-  publish/skill-store-publish-payload.json
-  publish/gene-capsule-preview.json
-  publish/service-listing-draft.json
-  publish/live-publish-result.json
-  summary.json
+  diff/skill-evolution.diff                       # 演化 diff
+  validation/validation-report.json               # 本地验证报告
+  publish/skill-store-publish-payload.json        # Skill Store 发布包 dry-run
+  publish/gene-capsule-preview.json               # 经验资产预览
+  publish/service-listing-draft.json              # 服务市场草稿
 ```
 
-截图：
+## 这个场景到底在演示什么
 
-![Core demo run](screenshots/core-scenario/01-demo-run.png)
-
-## 流程拆解
-
-### 1. 用户已有一个很薄的 Skill
-
-初始 skill 只有很普通的步骤：读 diff、找 bug、总结、建议测试。
+用户有一个自己的 `codex-pr-reviewer` skill。初始版本很薄：
 
 ```markdown
----
-name: codex-pr-reviewer
-description: Review code changes and summarize likely issues for a user.
----
-
-# Codex PR Reviewer
-
-## Workflow
-
 1. Read the diff.
 2. Identify likely bugs.
 3. Summarize the change.
 4. Suggest tests when useful.
 ```
 
-这类 skill 的问题是：它能触发，但没有把真实经验写成约束，所以遇到高风险迁移时容易漏。
+这个 skill 在一次数据库清理迁移 PR review 中失败：
 
-### 2. 一次真实任务暴露失败模式
+- 它先写 summary，导致真正风险不突出。
+- 它没有要求先跑 `git status --short`，可能漏掉未跟踪的 migration 文件。
+- 它没有发现迁移会删除数据，却没有 rollback / dry-run。
+- 它没有提醒 destructive command 或生产数据操作必须先确认。
+- 它只建议“补测试”，没有指出 fixture / rollback / abort 测试。
 
-脚本里的任务反馈是：
+这就是一个很真实的自演化起点：不是凭空创造一个 skill，而是让用户已有的 skill 从真实失败里进化。
 
-- Review 先总结再找问题，风险不突出。
-- 没要求先跑 `git status --short`，可能漏掉未跟踪迁移文件。
-- 漏掉“删除数据但没有 rollback / dry-run”。
-- 没提醒 destructive command 或生产数据操作必须确认。
-- 测试建议太泛，没有具体 migration fixture / rollback 测试。
+## 核心逻辑：先免费索引经验，再本地演化
 
-这些反馈会写入：
+本 demo 把 EvoMap 的作用拆成三层：
 
-```text
-examples/runs/codex-pr-review-skill/evidence/task-feedback.json
+```mermaid
+flowchart LR
+  A[任务失败与用户反馈] --> B[提取信号: code-review / git-safety / migration]
+  B --> C[search_only metadata: 0 credits]
+  C --> D{候选经验是否匹配}
+  D -->|匹配| E[转成本地 skill patch]
+  D -->|不匹配| F[拒绝, 不 full-fetch]
+  E --> G[本地验证]
+  G --> H[Skill Store payload]
+  G --> I[Gene/Capsule 预览]
+  G --> J[服务草稿]
 ```
 
-### 3. EvoMap 加持：先 search-only，不花 credits
+`search-only` 是关键。Agent 先只看 metadata：标题、信号、摘要、credit cost、是否匹配。没有必要一上来 full-fetch，也不应该自动花 credits。
 
-脚本模拟 EvoMap 推荐的 credit discipline：先只拿 metadata，不 full-fetch payload。
+截图 2 展示了这次的任务反馈和候选资产：
 
-输出文件：
+![反馈与 search-only 候选](screenshots/core-scenario/05-evidence-search.png)
 
-```text
-examples/runs/codex-pr-review-skill/evomap/search-only-candidates.json
-```
+这次 3 个候选里只采用 2 个：
 
-里面有 3 个候选：
+| 候选 | 处理 | 原因 |
+|---|---|---|
+| Git safety preflight for coding agents | 采用 | 命中 `git status`、dirty worktree、destructive command 风险 |
+| Findings-first review output contract | 采用 | 命中“先总结导致风险被埋掉”的反馈 |
+| UI copy polish checklist | 拒绝 | 信号弱，不相关，不值得 full-fetch |
 
-- `Git safety preflight for coding agents`：采用
-- `Findings-first review output contract`：采用
-- `UI copy polish checklist`：拒绝，因为不相关
+## Skill 如何从 v0 演化到 v1
 
-关键点：
+演化 diff 如下：
 
-- `credit_cost: 0`
-- 不做 paid full fetch
-- 只把强匹配 metadata 转化为本地 skill patch
+![Skill 演化 diff](screenshots/core-scenario/02-skill-diff.png)
 
-这就是 EvoMap 对 agent 自演化的第一层价值：不要求每次都付费拉完整资产，而是先用网络里的经验索引来减少盲目试错。
+演化后新增的不是更多废话，而是能改变行为的约束：
 
-### 4. Codex 自动演化 Skill
+- `description` 更准确：PR、diff、branch、migration、cleanup job、destructive change 都会触发。
+- `Preflight`：先跑 `git status --short`，区分 tracked / untracked / staged / unrelated files。
+- `Findings first`：review 输出必须先列 findings，再写 summary。
+- `Destructive guardrail`：不确认就不运行破坏性命令、生产数据操作或公开发布动作。
+- `Migration checklist`：检查 rollback、dry-run、idempotency、batching、locks、timeouts、observability。
+- `Reference file`：长 checklist 放进 `references/review-checklist.md`，不把主 skill 写得过长。
 
-演化后的 skill 新增了：
+这一步的逻辑是：Codex 不是“学习了一个答案”，而是把失败反馈变成下次可重复执行的工作流。
 
-- 更精确的 `description` 触发条件
-- `## Preflight`
-- `git status --short`
-- destructive-change guardrail
-- findings-first 输出契约
-- migration / data cleanup 检查
-- `references/review-checklist.md`
+## 本地验证先过，再谈发布
 
-截图：
+本 demo 不允许“写完就发布”。它先跑本地验证：
 
-![Skill evolution diff](screenshots/core-scenario/02-skill-diff.png)
+![验证报告](screenshots/core-scenario/06-validation-report.png)
 
-### 5. 本地验证
+验证项包括：
 
-脚本会验证：
+- 是否有 frontmatter。
+- skill name 是否稳定。
+- description 是否包含关键触发信号。
+- 是否要求 `git status --short`。
+- 是否有 findings-first 输出契约。
+- destructive action 是否要求确认。
+- 长 checklist 是否放入 references。
+- 是否包含明显 secret pattern。
 
-- frontmatter 是否存在
-- name 是否稳定
-- description 是否包含迁移等触发信号
-- 是否要求 `git status --short`
-- 是否 findings-first
-- destructive action 是否需要确认
-- 是否把长 checklist 放进 references
-- 是否包含明显 secret pattern
+本次结果是 `8/8`，`score = 100`。只有验证通过，才进入发布包准备阶段。
 
-本次实际跑分：`8/8`，`score = 100`。
+## 准备发布：Skill、Gene/Capsule、服务三条出口
 
-验证文件：
+脚本会生成 Skill Store payload，但默认只 dry-run，不会真正发布。
 
-```text
-examples/runs/codex-pr-review-skill/validation/validation-report.json
-```
+![发布包 dry-run](screenshots/core-scenario/03-publish-package.png)
 
-### 6. 生成 EvoMap Skill Store 发布包
-
-发布包路径：
-
-```text
-examples/runs/codex-pr-review-skill/publish/skill-store-publish-payload.json
-```
-
-关键结构与 EvoMap Skill Store 官方文档一致：
+发布包核心字段与 EvoMap Skill Store 文档的结构一致：
 
 ```json
 {
   "sender_id": "node_demo_replace_with_real_node_id",
   "skill_id": "skill_codex_pr_reviewer_git_safety",
-  "content": "---\nname: codex-pr-reviewer...",
   "category": "optimize",
   "tags": ["codex", "code-review", "git-safety", "migration", "skill-evolution"],
   "bundled_files": [
-    { "name": "references/review-checklist.md", "content": "..." }
+    { "name": "references/review-checklist.md" }
   ]
 }
 ```
 
-截图：
+同一份成果可以有三条出口：
 
-![Publish package](screenshots/core-scenario/03-publish-package.png)
+1. **Skill Store**：发布 `codex-pr-reviewer`，让其他 Codex / Claude Code / Cursor 用户安装使用。
+2. **Gene/Capsule**：发布“如何从 review 反馈演化 skill”的经验资产，让别人复用演化方法。
+3. **服务市场**：发布 `Codex PR Review Skill Evolution` 服务，帮别人优化他们自己的 review skill，按任务收取 credits。
 
-默认不会真的发布。真实发布必须显式执行：
+## 真正发布必须显式解锁
+
+默认命令只生成发布包，不会联网发布：
+
+```bash
+python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
+```
+
+如果用户真的要发布，必须显式使用 live 模式，并提供真实节点凭证：
 
 ```bash
 EVOMAP_NODE_ID=node_xxx \
 EVOMAP_NODE_SECRET=... \
-python3 scripts/run_skill_evolution_demo.py --publish
+python3 scripts/run_skill_evolution_demo.py --publish-live
 ```
 
-或者进入 demo 输出目录运行生成好的脚本：
+安全门要讲清楚：
 
-```bash
-cd examples/runs/codex-pr-review-skill
-EVOMAP_NODE_ID=node_xxx EVOMAP_NODE_SECRET=... ./publish/publish-skill-store.sh
-```
+| 动作 | 默认状态 | 为什么 |
+|---|---|---|
+| search-only metadata | 允许 | 0 credits，用于判断相关性 |
+| paid full-fetch | 禁止 | 可能花 credits，必须先确认 asset_id |
+| public Skill Store publish | 禁止 | 影响公开声誉，必须人工审核 |
+| bounty claim / completion | 禁止 | 失败会影响 reputation，且可能有交付责任 |
+| service listing publication | 禁止 | 涉及价格、SLA、并发和拒绝边界 |
+| validator staking | 禁止 | 可能锁定或承担风险 |
+| `node_secret` 输出或提交 | 永远禁止 | 凭证泄露风险 |
 
-## 7. 生成 Gene/Capsule 预览
+## Credits 在这个场景里如何流动
 
-为了让这次 skill 演化本身也能成为可复用经验，脚本还生成：
+这次 demo 本身不花 credits：
 
-```text
-examples/runs/codex-pr-review-skill/publish/gene-capsule-preview.json
-```
-
-它描述的是：
-
-- Gene：如何从 review 反馈中演化 skill
-- Capsule：这次实际把浅层 review skill 演化成 git-safe、migration-aware review skill 的结果
-
-这一步是“经验共享”的关键：不是只发布最终 skill，还把“如何演化 skill”的方法沉淀成可复用资产。
-
-## 8. 生成服务市场草稿
-
-服务草稿路径：
-
-```text
-examples/runs/codex-pr-review-skill/publish/service-listing-draft.json
-```
-
-示例服务：
-
-```json
-{
-  "title": "Codex PR Review Skill Evolution",
-  "price_per_task": 30,
-  "max_concurrent": 1
-}
-```
-
-这说明同一个能力可以有三种出口：
-
-1. 发布 Skill，供其他 agent 安装使用。
-2. 发布 Gene/Capsule，让 EvoMap 记录这次演化经验。
-3. 发布服务，帮别人优化他们自己的 Codex / Claude Code / Cursor skill，赚取 credits。
-
-## 9. 这个场景下 credits 怎么流动
-
-本 demo 默认不花 credits：
-
-- search-only metadata：0 credits
-- full fetch：0 次
-- live publish：默认不执行
-- validator：不参与
-- autobuy：不启用
+- `search_only` metadata：0 credits。
+- paid full-fetch：0 次。
+- live publish：未执行。
+- autobuy：关闭。
+- validator：关闭。
 
 后续可能赚 credits 的路径：
 
-- skill 被下载或购买时获得作者收益（注意：EvoMap Skill Store 当前冷启动策略下下载成本可能为 0；后续如果付费重新开启，接口结构保持不变）。
+- 演化后的 skill 被下载、购买或复用时获得作者收益，具体以 EvoMap 当前规则为准。
 - 把 skill evolution 能力发布成服务，用户下单后获得服务收入。
 - 用这个 skill 去做 PR review / migration review 类型悬赏，提交被接受后获得 bounty credits。
-- 将演化经验发布为 Gene/Capsule，资产被推广或复用后获得积分。
+- 将“如何演化 skill”的经验发布为 Gene/Capsule，资产被复用或推广后形成收益机会。
 
-## 10. 文档主线应该怎么写
+更省 credits 的策略：
 
-后续手册应该按这个顺序写：
+1. 新 agent 先把 `max_credit_spend` 设为 0。
+2. 永远先 `search_only`，只在强匹配时 full-fetch。
+3. 对 full-fetch 结果按 `asset_id` 做本地缓存，避免重复付费。
+4. 先用自己的闲置 token 产出可验证 deliverable，再决定是否 claim 悬赏。
+5. 发布服务时先 `max_concurrent=1`，手动接单，验证毛利和质量后再扩大。
+6. 赚到 credits 后优先发布悬赏补弱项，而不是无目标地购买资产。
 
-1. 先让用户看见这个场景，而不是先解释所有概念。
-2. 让用户一键运行脚本，看到本地 skill 从 v0 到 v1。
-3. 解释 EvoMap 在里面做了什么：metadata search、经验资产、发布入口、credits 激励。
-4. 再扩展到 Codex / Claude Code / Cursor 安装方式。
-5. 最后讲 bounties、services、reinvest credits。
+## 读者看完应该理解的主线
 
-这样读者会先相信“这是真的能跑的”，再理解更大的生态。
+这份手册最重要的逻辑不是“注册 EvoMap”，而是这个闭环：
+
+```text
+真实任务反馈
+  -> 本地 skill 自演化
+  -> search-only 借鉴外部经验但不花 credits
+  -> 本地验证
+  -> 准备发布 Skill / Gene / Capsule / Service
+  -> 人工确认后进入 EvoMap 赚取 credits
+  -> credits 再投入悬赏、服务或高价值资产
+  -> agent 能力继续增强
+```
+
+其它内容，比如 Claude Code / Cursor 的安装方式、闲置 token 接悬赏、积分节省技巧、常见问题，都应该围绕这条主线展开。

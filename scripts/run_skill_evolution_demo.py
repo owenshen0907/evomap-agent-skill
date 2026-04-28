@@ -15,6 +15,7 @@ import difflib
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 from datetime import datetime, timezone
 from urllib import request, error
@@ -258,16 +259,30 @@ def build_gene_capsule(validation: dict, publish_payload: dict) -> dict:
     return {"assets": [gene, capsule], "signature": "demo_unsigned_dry_run"}
 
 
-def maybe_publish(payload: dict, yes: bool) -> dict:
+def rel(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def maybe_publish(payload: dict, mode: str) -> dict:
     node_id = os.environ.get("EVOMAP_NODE_ID") or os.environ.get("A2A_NODE_ID")
     node_secret = os.environ.get("EVOMAP_NODE_SECRET") or os.environ.get("A2A_NODE_SECRET")
-    if not yes:
-        return {"ok": False, "skipped": True, "reason": "dry_run_default", "endpoint": f"{HUB}/a2a/skill/store/publish"}
+    endpoint = f"{HUB}/a2a/skill/store/publish"
+    if mode != "live":
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "dry_run_default" if mode == "default" else "publish_dry_run",
+            "endpoint": endpoint,
+            "credit_impact": "0 credits spent; no public publish attempted",
+        }
     if not node_id or not node_secret:
-        return {"ok": False, "skipped": True, "reason": "missing_EVOMAP_NODE_ID_or_SECRET"}
+        return {"ok": False, "skipped": True, "reason": "missing_EVOMAP_NODE_ID_or_SECRET", "endpoint": endpoint}
     live_payload = {**payload, "sender_id": node_id}
     req = request.Request(
-        f"{HUB}/a2a/skill/store/publish",
+        endpoint,
         data=json.dumps(live_payload).encode("utf-8"),
         headers={"content-type": "application/json", "authorization": f"Bearer {node_secret}"},
         method="POST",
@@ -285,13 +300,9 @@ def maybe_publish(payload: dict, yes: bool) -> dict:
         return {"ok": False, "status": exc.code, "response": parsed}
 
 
-def run_demo(out: Path, clean: bool, publish: bool) -> dict:
+def run_demo(out: Path, clean: bool, publish_mode: str) -> dict:
     if clean and out.exists():
-        for child in sorted(out.rglob("*"), reverse=True):
-            if child.is_file() or child.is_symlink():
-                child.unlink()
-            elif child.is_dir():
-                child.rmdir()
+        shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
 
     initial_dir = out / "initial" / "codex-pr-reviewer"
@@ -354,7 +365,7 @@ curl -sS -X POST https://evomap.ai/a2a/skill/store/publish \
     bundle = build_gene_capsule(validation, publish_payload)
     write(out / "publish" / "gene-capsule-preview.json", json.dumps(bundle, ensure_ascii=False, indent=2) + "\n")
 
-    publish_result = maybe_publish(publish_payload, publish)
+    publish_result = maybe_publish(publish_payload, publish_mode)
     write(out / "publish" / "live-publish-result.json", json.dumps(publish_result, ensure_ascii=False, indent=2) + "\n")
 
     timeline = f"""# Demo Run: Codex PR Review Skill Evolution
@@ -372,7 +383,7 @@ A user has a simple Codex review skill. It fails on a database cleanup migration
 3. Search metadata only: `evomap/search-only-candidates.json` (0 credits)
 4. Evolve skill: `evolved/codex-pr-reviewer/SKILL.md`
 5. Validate: `validation/validation-report.json` ({validation['passed']}/{validation['total']} checks, score {validation['score']})
-6. Package Skill Store payload: `publish/skill-store-publish-payload.json`
+6. Prepare publish dry-run package: `publish/skill-store-publish-payload.json`
 7. Prepare Gene/Capsule preview: `publish/gene-capsule-preview.json`
 8. Prepare service listing: `publish/service-listing-draft.json`
 
@@ -380,40 +391,102 @@ A user has a simple Codex review skill. It fails on a database cleanup migration
 
 - Search-only metadata spend: 0 credits.
 - Full fetches: 0.
-- Live publish: {'attempted' if publish else 'not attempted; dry-run package generated'}.
+- Live publish: {'attempted' if publish_mode == 'live' else 'not attempted; dry-run package generated'}.
 - Monetization path: publish skill for distribution, sell the service for repeated skill evolution work, and earn credits through bounties or asset reuse when accepted by EvoMap quality gates.
 
 ## Human Confirmation Gates
 
-- Publish to Skill Store requires real `EVOMAP_NODE_ID` / `EVOMAP_NODE_SECRET` and explicit `--publish`.
+- Publish to Skill Store requires real `EVOMAP_NODE_ID` / `EVOMAP_NODE_SECRET` and explicit `--publish-live`.
 - Public visibility, paid full fetch, bounty claim, and service publication remain manual decisions.
 """
     write(out / "README.md", timeline)
 
     summary = {
         "out_dir": str(out),
+        "out_dir_relative": rel(out),
         "validation_score": validation["score"],
         "publish_payload": str(out / "publish" / "skill-store-publish-payload.json"),
+        "publish_payload_relative": rel(out / "publish" / "skill-store-publish-payload.json"),
+        "publish_mode": publish_mode,
         "live_publish": publish_result,
         "evolved_skill": str(evolved_dir / "SKILL.md"),
+        "evolved_skill_relative": rel(evolved_dir / "SKILL.md"),
         "diff": str(out / "diff" / "skill-evolution.diff"),
+        "diff_relative": rel(out / "diff" / "skill-evolution.diff"),
+        "credit_impact": {
+            "search_only_metadata": 0,
+            "full_fetches": 0,
+            "live_publish_attempted": publish_mode == "live",
+            "autobuy": "off",
+            "validator": "off",
+        },
+        "human_confirmation_gates": [
+            "paid full fetch",
+            "public Skill Store publish",
+            "bounty claim or completion",
+            "service listing publication",
+            "validator staking",
+        ],
     }
     write(out / "summary.json", json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
     return summary
+
+
+def print_human_summary(summary: dict) -> None:
+    live_publish = summary["live_publish"]
+    print("EvoMap skill evolution demo complete")
+    print("")
+    print("Scenario")
+    print("- A thin Codex PR-review skill failed on a risky database cleanup migration.")
+    print("- The demo turns task feedback into a safer, findings-first, migration-aware skill.")
+    print("- EvoMap is represented as: search-only metadata -> publish package -> Gene/Capsule -> service draft.")
+    print("")
+    print("Run result")
+    print(f"- Output: {summary['out_dir_relative']}")
+    print(f"- Validation: {summary['validation_score']}/100")
+    print("- Credit impact: 0 credits spent, 0 paid full-fetches, autobuy off, validator off")
+    print(f"- Publish mode: {summary['publish_mode']}")
+    print(f"- Live publish: {'attempted' if summary['publish_mode'] == 'live' else 'not attempted'} ({live_publish.get('reason', 'ok')})")
+    print("")
+    print("Files to inspect next")
+    print("- Evidence: examples/runs/codex-pr-review-skill/evidence/task-feedback.json")
+    print("- EvoMap search-only candidates: examples/runs/codex-pr-review-skill/evomap/search-only-candidates.json")
+    print(f"- Evolved skill: {summary['evolved_skill_relative']}")
+    print(f"- Diff: {summary['diff_relative']}")
+    print("- Validation: examples/runs/codex-pr-review-skill/validation/validation-report.json")
+    print(f"- Skill Store payload: {summary['publish_payload_relative']}")
+    print("- Gene/Capsule preview: examples/runs/codex-pr-review-skill/publish/gene-capsule-preview.json")
+    print("- Service draft: examples/runs/codex-pr-review-skill/publish/service-listing-draft.json")
+    print("")
+    print("Safety gates still require a human confirmation")
+    for gate in summary["human_confirmation_gates"]:
+        print(f"- {gate}")
+    print("")
+    print("Live publish, only when you really want it:")
+    print("EVOMAP_NODE_ID=node_xxx EVOMAP_NODE_SECRET=*** python3 scripts/run_skill_evolution_demo.py --publish-live")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the EvoMap skill evolution demo")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="output directory")
     parser.add_argument("--clean", action="store_true", help="remove existing output first")
-    parser.add_argument("--publish", action="store_true", help="attempt live Skill Store publish; requires EVOMAP_NODE_ID and EVOMAP_NODE_SECRET")
+    parser.add_argument("--publish-dry-run", action="store_true", help="explicitly keep publishing as a dry run; this is also the default")
+    parser.add_argument("--publish-live", action="store_true", help="attempt live Skill Store publish; requires EVOMAP_NODE_ID and EVOMAP_NODE_SECRET")
+    parser.add_argument("--publish", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--json", action="store_true", help="print machine-readable JSON summary instead of the human walkthrough")
     parser.add_argument("--check", type=Path, help="validate a skill file and exit")
     args = parser.parse_args()
     if args.check:
         print(json.dumps(validate_skill(args.check), ensure_ascii=False, indent=2))
         return
-    summary = run_demo(args.out, args.clean, args.publish)
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    if args.publish_dry_run and (args.publish_live or args.publish):
+        parser.error("--publish-live/--publish and --publish-dry-run cannot be used together")
+    publish_mode = "live" if (args.publish_live or args.publish) else ("dry_run" if args.publish_dry_run else "default")
+    summary = run_demo(args.out, args.clean, publish_mode)
+    if args.json:
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+    else:
+        print_human_summary(summary)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Demo Run: Codex PR Review Skill Evolution
 
-Generated at: 2026-04-28T07:09:51.637991+00:00
+Generated at: 2026-04-28T07:42:23.983575+00:00
 
 ## Core Scenario
 
@@ -13,7 +13,7 @@ A user has a simple Codex review skill. It fails on a database cleanup migration
 3. Search metadata only: `evomap/search-only-candidates.json` (0 credits)
 4. Evolve skill: `evolved/codex-pr-reviewer/SKILL.md`
 5. Validate: `validation/validation-report.json` (8/8 checks, score 100)
-6. Package Skill Store payload: `publish/skill-store-publish-payload.json`
+6. Prepare publish dry-run package: `publish/skill-store-publish-payload.json`
 7. Prepare Gene/Capsule preview: `publish/gene-capsule-preview.json`
 8. Prepare service listing: `publish/service-listing-draft.json`
 
@@ -26,5 +26,5 @@ A user has a simple Codex review skill. It fails on a database cleanup migration
 
 ## Human Confirmation Gates
 
-- Publish to Skill Store requires real `EVOMAP_NODE_ID` / `EVOMAP_NODE_SECRET` and explicit `--publish`.
+- Publish to Skill Store requires real `EVOMAP_NODE_ID` / `EVOMAP_NODE_SECRET` and explicit `--publish-live`.
 - Public visibility, paid full fetch, bounty claim, and service publication remain manual decisions.

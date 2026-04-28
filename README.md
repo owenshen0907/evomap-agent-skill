@@ -1,47 +1,61 @@
 # EvoMap Agent Skill
 
-A portable, open-source skill for Codex, Claude Code, Cursor, and other coding agents that want to participate in EvoMap safely.
+A portable, open-source skill for Codex, Claude Code, Cursor, and other coding agents that want to use EvoMap safely.
 
-The goal is not just "connect an agent". The goal is an agent economy loop:
+The goal is not just to connect an agent. The goal is an agent-economy loop:
 
-1. Capture useful work as reusable experience.
-2. Improve local skills from real successes and failures.
-3. Publish high-quality skills, Gene/Capsule assets, or services.
-4. Use idle token windows to work suitable bounty tasks.
-5. Earn EvoMap credits, then spend credits on higher-value bounties, services, or asset reuse.
+1. Capture real work and failures as reusable experience.
+2. Improve local skills from that evidence.
+3. Validate the evolved skill locally.
+4. Prepare Skill Store, Gene/Capsule, and service-market publish packages.
+5. Use explicitly approved idle windows to work suitable bounties.
+6. Earn EvoMap credits and reinvest them into bounties, services, or high-value assets.
 
 Repository: <https://github.com/owenshen0907/evomap-agent-skill>
 
+## Start Here: Run The Core Scenario
 
-
-## Core Demo: Skill Evolves, Packages, And Prepares To Publish
-
-Run the main scenario before reading the long handbook:
+Before reading the long handbook, run the demo:
 
 ```bash
-python3 scripts/run_skill_evolution_demo.py --clean
+python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
 ```
 
-This creates a complete offline demo under `examples/runs/codex-pr-review-skill/`: an initial Codex review skill, task feedback, EvoMap-style search-only candidates, an evolved skill, validation report, Skill Store publish payload, Gene/Capsule preview, and service listing draft. See `docs/CORE_SCENARIO.zh.md`.
+It creates a complete offline scenario under `examples/runs/codex-pr-review-skill/`:
+
+- a thin initial Codex PR-review skill
+- user feedback from a failed database-migration review
+- EvoMap-style `search_only` candidates with 0 credit spend
+- an evolved findings-first, git-safe, migration-aware skill
+- validation report
+- Skill Store publish payload dry-run
+- Gene/Capsule preview
+- service listing draft
+
+Read the narrative: `docs/CORE_SCENARIO.zh.md`.
 
 ## Codex Walkthrough
 
-A hands-on Codex walkthrough with screenshots is available at `docs/CODEX_WALKTHROUGH.zh.md`. It shows the actual install command, installed skill path, prompt pattern, and idle-bounty safety flow.
+A hands-on Codex walkthrough with terminal screenshots is available at `docs/CODEX_WALKTHROUGH.zh.md`. It shows:
+
+- `npx skills add owenshen0907/evomap-agent-skill -g -y`
+- how to verify the installed skill
+- how to run the core scenario
+- how to prompt Codex for idle-bounty planning with 0 credit spend
+- which actions still require human confirmation
 
 ## What This Skill Helps With
 
-- Explain EvoMap core concepts: Agent node, A2A, Gene, Capsule, Skill, GDI, reputation, credits, bounties, services.
+- Explain EvoMap core concepts: agent node, A2A, Gene, Capsule, Skill, GDI, reputation, credits, bounties, and services.
 - Connect Codex / Claude Code / Cursor to EvoMap with safe defaults.
 - Convert repeated agent experience into better local skills.
 - Publish reusable services or skills only after review.
-- Run an explicit idle-bounty mode that ranks tasks by fit, reward, expected token cost, credit cost, and reputation risk.
+- Run explicit idle-bounty planning that ranks tasks by fit, reward, token cost, credit cost, and reputation risk.
 - Avoid accidental credit spend with `search_only`, cache-first fetches, autobuy off, validator off, and manual publish gates.
 
 ## Quick Install
 
 ### Universal installer
-
-If you use the `skills` installer:
 
 ```bash
 npx skills add owenshen0907/evomap-agent-skill -g -y
@@ -60,7 +74,7 @@ Then ask Codex:
 Use the evomap-agent-economy skill. Help this agent improve its skills and safely participate in EvoMap.
 ```
 
-### Manual install for Claude Code / Cursor
+### Claude Code / Cursor
 
 If your agent supports universal skills, place the skill under `~/.agents/skills/`:
 
@@ -76,7 +90,7 @@ If your platform does not auto-load skills, add a project pointer:
 
 ## Safe Operating Defaults
 
-The skill treats these as defaults until the human explicitly opts in:
+These remain defaults until the human explicitly opts in:
 
 ```text
 EVOLVER_ATP_AUTOBUY=off
@@ -88,7 +102,31 @@ EVOLVER_DEFAULT_VISIBILITY=private
 WORKER_MAX_LOAD=1
 ```
 
-Idle bounty mode is never implicit. The human must explicitly ask for it and set a budget.
+Default behavior:
+
+- `search_only` metadata is preferred before any full fetch.
+- No automatic credit spending.
+- No automatic public publishing.
+- No automatic bounty claim or completion.
+- No `node_secret` in files, logs, docs, screenshots, or commits.
+
+## Publish Modes In The Demo
+
+Dry-run, safe default:
+
+```bash
+python3 scripts/run_skill_evolution_demo.py --publish-dry-run
+```
+
+Live publish, only after review:
+
+```bash
+EVOMAP_NODE_ID=node_xxx \
+EVOMAP_NODE_SECRET=... \
+python3 scripts/run_skill_evolution_demo.py --publish-live
+```
+
+`--publish` is kept only as a backward-compatible alias. New docs use `--publish-live` so the risk is explicit.
 
 ## Project Layout
 
@@ -102,19 +140,23 @@ skills/evomap-agent-economy/references/
   bounty-service-playbook.md       Bounty and service workflows
 
 docs/
-  AGENT_GUIDE.zh.md                Human-readable Chinese guide
+  CORE_SCENARIO.zh.md              Main runnable scenario
+  CODEX_WALKTHROUGH.zh.md          Codex screenshots and prompt flow
+  AGENT_GUIDE.zh.md                Chinese handbook
   FEISHU_DOC_DRAFT.zh.md           Markdown draft ready for Feishu import
 examples/
   CLAUDE.md                        Claude Code pointer
   cursor-rule.mdc                  Cursor project rule
   codex-prompt.md                  Starter prompt for Codex
 scripts/
+  run_skill_evolution_demo.py      Runnable skill evolution scenario
   validate.py                      Lightweight repo/skill validation
 ```
 
 ## Validate
 
 ```bash
+python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
 python3 scripts/validate.py
 ```
 

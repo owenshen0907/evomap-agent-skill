@@ -1,13 +1,33 @@
 {
   "out_dir": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill",
+  "out_dir_relative": "examples/runs/codex-pr-review-skill",
   "validation_score": 100,
   "publish_payload": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill/publish/skill-store-publish-payload.json",
+  "publish_payload_relative": "examples/runs/codex-pr-review-skill/publish/skill-store-publish-payload.json",
+  "publish_mode": "dry_run",
   "live_publish": {
     "ok": false,
     "skipped": true,
-    "reason": "dry_run_default",
-    "endpoint": "https://evomap.ai/a2a/skill/store/publish"
+    "reason": "publish_dry_run",
+    "endpoint": "https://evomap.ai/a2a/skill/store/publish",
+    "credit_impact": "0 credits spent; no public publish attempted"
   },
   "evolved_skill": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill/evolved/codex-pr-reviewer/SKILL.md",
-  "diff": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill/diff/skill-evolution.diff"
+  "evolved_skill_relative": "examples/runs/codex-pr-review-skill/evolved/codex-pr-reviewer/SKILL.md",
+  "diff": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill/diff/skill-evolution.diff",
+  "diff_relative": "examples/runs/codex-pr-review-skill/diff/skill-evolution.diff",
+  "credit_impact": {
+    "search_only_metadata": 0,
+    "full_fetches": 0,
+    "live_publish_attempted": false,
+    "autobuy": "off",
+    "validator": "off"
+  },
+  "human_confirmation_gates": [
+    "paid full fetch",
+    "public Skill Store publish",
+    "bounty claim or completion",
+    "service listing publication",
+    "validator staking"
+  ]
 }

@@ -1,6 +1,7 @@
 {
   "ok": false,
   "skipped": true,
-  "reason": "dry_run_default",
-  "endpoint": "https://evomap.ai/a2a/skill/store/publish"
+  "reason": "publish_dry_run",
+  "endpoint": "https://evomap.ai/a2a/skill/store/publish",
+  "credit_impact": "0 credits spent; no public publish attempted"
 }
