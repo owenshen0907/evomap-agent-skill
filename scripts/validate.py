@@ -11,6 +11,7 @@ REQUIRED = [
     ROOT / "docs" / "AGENT_GUIDE.zh.md",
     ROOT / "docs" / "FEISHU_DOC_DRAFT.zh.md",
     ROOT / "docs" / "OPERATIONS_FAQ.zh.md",
+    ROOT / "docs" / "OFFICIAL_EVOLVER_SELF_EVOLUTION.zh.md",
     ROOT / "docs" / "CORE_SCENARIO.zh.md",
     ROOT / "scripts" / "run_skill_evolution_demo.py",
     SKILL,
@@ -21,6 +22,7 @@ REQUIRED = [
     ROOT / "skills" / "evomap-agent-economy" / "references" / "skill-self-improvement.md",
     ROOT / "skills" / "evomap-agent-economy" / "references" / "bounty-service-playbook.md",
     ROOT / "skills" / "evomap-agent-economy" / "references" / "operations-faq.md",
+    ROOT / "skills" / "evomap-agent-economy" / "references" / "official-evolver-self-evolution.md",
 ]
 
 errors = []

@@ -23,6 +23,7 @@ Turn agent work into reusable experience and safe credit flow. Do not merely con
 - `references/skill-self-improvement.md`: how to improve skills from experience.
 - `references/bounty-service-playbook.md`: bounty, service, and publish workflows.
 - `references/operations-faq.md`: one-node setup, clean install hygiene, and paid asset recovery.
+- `references/official-evolver-self-evolution.md`: official hook/memory/review model and credit philosophy.
 
 ## Non-Negotiable Safety Defaults
 

@@ -21,6 +21,7 @@ The handbook now starts with the user-visible logic before explaining protocol d
 - `docs/CORE_SCENARIO.zh.md` follows the same narrative around the runnable skill-evolution demo.
 - `docs/PLATFORM_WALKTHROUGH.zh.md` covers Codex, Claude Code, and Cursor screenshots.
 - `docs/OPERATIONS_FAQ.zh.md` covers one-node setup, clean installs, worker cleanup, and paid asset recovery.
+- `docs/OFFICIAL_EVOLVER_SELF_EVOLUTION.zh.md` explains the official hook + memory + review model for always-on self-evolution.
 
 Key diagrams:
 
@@ -71,6 +72,7 @@ Claude Code and Cursor screenshots are included in `docs/PLATFORM_WALKTHROUGH.zh
 - Run explicit idle-bounty planning that ranks tasks by fit, reward, token cost, credit cost, and reputation risk.
 - Avoid accidental credit spend with `search_only`, cache-first fetches, autobuy off, validator off, and manual publish gates.
 - Keep local EvoMap installs clean: one node per machine by default, one runtime, no stale worker loop, and no duplicate paid asset fetches.
+- Replace repeated manual "please learn this" prompts with Evolver hooks, local memory, review gates, and explicit credit budgets.
 
 ## Quick Install
 
@@ -158,6 +160,7 @@ skills/evomap-agent-economy/references/
   skill-self-improvement.md        How agents improve their own skills
   bounty-service-playbook.md       Bounty and service workflows
   operations-faq.md                One-node setup, cleanup, and paid asset recovery
+  official-evolver-self-evolution.md Official hook/memory/review model
 
 docs/
   CORE_SCENARIO.zh.md              Main runnable scenario
@@ -165,6 +168,7 @@ docs/
   PLATFORM_WALKTHROUGH.zh.md       Codex / Claude Code / Cursor screenshots
   AGENT_GUIDE.zh.md                Chinese handbook
   OPERATIONS_FAQ.zh.md             One-node, clean install, and paid asset recovery FAQ
+  OFFICIAL_EVOLVER_SELF_EVOLUTION.zh.md Official self-evolution model and credit philosophy
   FEISHU_DOC_DRAFT.zh.md           Markdown draft ready for Feishu import
   diagrams/                        Line diagrams for the handbook
 examples/
