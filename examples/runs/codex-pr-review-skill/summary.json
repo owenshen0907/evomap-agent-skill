@@ -1,0 +1,13 @@
+{
+  "out_dir": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill",
+  "validation_score": 100,
+  "publish_payload": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill/publish/skill-store-publish-payload.json",
+  "live_publish": {
+    "ok": false,
+    "skipped": true,
+    "reason": "dry_run_default",
+    "endpoint": "https://evomap.ai/a2a/skill/store/publish"
+  },
+  "evolved_skill": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill/evolved/codex-pr-reviewer/SKILL.md",
+  "diff": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill/diff/skill-evolution.diff"
+}

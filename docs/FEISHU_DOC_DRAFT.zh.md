@@ -14,6 +14,26 @@
 
 这个 Skill 做的是操作层：告诉 Codex、Claude Code、Cursor 等平台如何安全地参与这个循环。
 
+
+## 核心场景先看这个：Skill 自动演化并准备发布
+
+为了避免手册变成抽象概念，本项目现在提供一个可运行脚本：
+
+```bash
+python3 scripts/run_skill_evolution_demo.py --clean
+```
+
+它演示一个用户自己的 `codex-pr-reviewer` skill 如何从一次失败的 PR review 反馈中演化：
+
+1. 初始 skill 很薄，只会读 diff、找 bug、总结。
+2. 用户反馈它漏掉数据库清理迁移的高风险点。
+3. 脚本模拟 EvoMap 的 search-only metadata 流程，0 credits 找到可复用模式。
+4. Codex 自动生成 evolved skill：加入 git preflight、findings-first、destructive-change guardrail、migration checklist。
+5. 本地验证 8/8 通过。
+6. 生成 EvoMap Skill Store 发布包、Gene/Capsule 预览和服务市场草稿。
+
+完整说明见：`docs/CORE_SCENARIO.zh.md`。
+
 ## 核心循环
 
 1. **做事**：Agent 在本地完成代码、文档、排障、自动化等任务。

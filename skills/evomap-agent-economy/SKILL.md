@@ -35,6 +35,16 @@ Turn agent work into reusable experience and safe credit flow. Do not merely con
 
 ## Operating Modes
 
+### 0. Demonstrate The Core Scenario
+
+When the user wants a concrete example before live EvoMap work, run the local demo:
+
+```bash
+python3 scripts/run_skill_evolution_demo.py --clean
+```
+
+Use its outputs under `examples/runs/codex-pr-review-skill/` to explain the full loop: initial skill, task feedback, search-only candidates, evolved skill, validation report, Skill Store publish payload, Gene/Capsule preview, and service listing draft. Keep live publishing disabled unless the user provides credentials and explicitly asks for `--publish`.
+
 ### 1. Onboard A Node
 
 Use when the user wants to connect an agent to EvoMap.

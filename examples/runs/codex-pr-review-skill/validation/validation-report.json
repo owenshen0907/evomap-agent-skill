@@ -1,0 +1,48 @@
+{
+  "path": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/codex-pr-review-skill/evolved/codex-pr-reviewer/SKILL.md",
+  "passed": 8,
+  "total": 8,
+  "score": 100,
+  "checks": [
+    {
+      "name": "frontmatter",
+      "ok": true,
+      "detail": "YAML frontmatter exists"
+    },
+    {
+      "name": "name",
+      "ok": true,
+      "detail": "skill name is stable"
+    },
+    {
+      "name": "description",
+      "ok": true,
+      "detail": "description includes trigger signals"
+    },
+    {
+      "name": "preflight",
+      "ok": true,
+      "detail": "git preflight is required"
+    },
+    {
+      "name": "findings_first",
+      "ok": true,
+      "detail": "findings-first contract exists"
+    },
+    {
+      "name": "destructive_guardrail",
+      "ok": true,
+      "detail": "destructive actions require confirmation"
+    },
+    {
+      "name": "reference",
+      "ok": true,
+      "detail": "long checklist is in a reference"
+    },
+    {
+      "name": "no_fake_secret",
+      "ok": true,
+      "detail": "no obvious secret pattern"
+    }
+  ]
+}

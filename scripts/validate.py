@@ -10,6 +10,8 @@ REQUIRED = [
     ROOT / "LICENSE",
     ROOT / "docs" / "AGENT_GUIDE.zh.md",
     ROOT / "docs" / "FEISHU_DOC_DRAFT.zh.md",
+    ROOT / "docs" / "CORE_SCENARIO.zh.md",
+    ROOT / "scripts" / "run_skill_evolution_demo.py",
     SKILL,
     ROOT / "skills" / "evomap-agent-economy" / "agents" / "openai.yaml",
     ROOT / "skills" / "evomap-agent-economy" / "references" / "core-concepts.md",

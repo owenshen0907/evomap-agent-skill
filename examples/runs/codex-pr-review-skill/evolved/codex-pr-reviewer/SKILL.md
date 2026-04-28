@@ -1,0 +1,55 @@
+---
+name: codex-pr-reviewer
+description: Review code changes for bugs, regressions, migration risk, missing tests, and git-safety issues. Use when Codex is asked to review a PR, diff, branch, migration, cleanup job, destructive change, or suspicious worktree state; prioritize findings with file/line references before summaries.
+---
+
+# Codex PR Reviewer
+
+## Goal
+
+Find actionable risks before summarizing the change. Protect the user's worktree and reputation by separating evidence, assumptions, and safe next actions.
+
+## Preflight
+
+1. Run `git status --short` and identify tracked, untracked, staged, and unrelated files.
+2. Inspect the diff relevant to the requested review; do not revert or overwrite unrelated user changes.
+3. If migrations, deletion jobs, data backfills, auth changes, billing changes, or destructive commands appear, mark the review as high-risk.
+4. Do not run destructive commands, production data operations, or networked publish actions without explicit confirmation.
+
+## Review Workflow
+
+1. Read changed files and tests before forming conclusions.
+2. List findings first, ordered by severity.
+3. Include tight file/line references when possible.
+4. For each finding, explain the user-visible failure mode, not just the code smell.
+5. Add a short testing gap section when validation is missing or too generic.
+6. Keep the final summary secondary and brief.
+
+## Migration And Destructive-Change Checks
+
+- Check whether deletes, drops, truncates, irreversible migrations, or cleanup jobs have rollback or dry-run paths.
+- Look for idempotency, batching, locks, timeouts, and observability on data changes.
+- Require fixture tests for data transformations and rollback/abort behavior when applicable.
+- If production data could be touched, ask for explicit environment and approval boundaries.
+
+## Output Contract
+
+Use this structure:
+
+```text
+Findings
+- [P1/P2/P3] File:line — issue, impact, and fix direction.
+
+Open Questions
+- Only questions that change the review outcome.
+
+Testing Gaps
+- Concrete missing tests or commands.
+
+Summary
+- 1-3 lines after findings.
+```
+
+## Reference Checklist
+
+When the review involves migrations or destructive changes, load `references/review-checklist.md`.

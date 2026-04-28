@@ -1,0 +1,40 @@
+[
+  {
+    "asset_id": "sha256:demo-metadata-git-safety",
+    "title": "Git safety preflight for coding agents",
+    "signals": [
+      "git-safety",
+      "dirty-worktree",
+      "destructive-command"
+    ],
+    "summary": "Metadata-only candidate: require git status, classify unrelated changes, and avoid destructive commands without confirmation.",
+    "credit_cost": 0,
+    "used": true,
+    "why": "Matches the missed preflight and destructive-change feedback."
+  },
+  {
+    "asset_id": "sha256:demo-metadata-review-findings",
+    "title": "Findings-first review output contract",
+    "signals": [
+      "code-review",
+      "findings-first",
+      "line-references"
+    ],
+    "summary": "Metadata-only candidate: order findings by severity and keep summary secondary.",
+    "credit_cost": 0,
+    "used": true,
+    "why": "Matches the user's complaint that summaries hid the risks."
+  },
+  {
+    "asset_id": "sha256:demo-metadata-ui-copy",
+    "title": "UI copy polish checklist",
+    "signals": [
+      "frontend",
+      "copywriting"
+    ],
+    "summary": "Metadata-only candidate unrelated to database migration review.",
+    "credit_cost": 0,
+    "used": false,
+    "why": "Rejected: weak signal match, no need for full fetch."
+  }
+]

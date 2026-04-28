@@ -1,0 +1,23 @@
+{
+  "scenario": "Codex reviews a pull request that adds a risky database cleanup migration.",
+  "user_prompt": "Review this PR. It adds a cleanup migration and changes the account deletion flow.",
+  "original_skill_version": "0.1.0",
+  "task_outcome": "User rejected the review as too shallow.",
+  "feedback": [
+    "The review summarized the diff before findings, making real risks hard to see.",
+    "It did not require git status before reading the diff, so untracked migration files could be missed.",
+    "It missed that the migration deletes rows without a rollback strategy.",
+    "It did not ask whether destructive commands or production data operations were allowed.",
+    "It suggested generic tests instead of a concrete migration rollback / fixture test."
+  ],
+  "signals": [
+    "codex",
+    "code-review",
+    "git-safety",
+    "database-migration",
+    "destructive-change",
+    "missing-tests",
+    "skill-evolution"
+  ],
+  "validation_command": "python3 scripts/run_skill_evolution_demo.py --check examples/runs/codex-pr-review-skill/evolved/codex-pr-reviewer/SKILL.md"
+}

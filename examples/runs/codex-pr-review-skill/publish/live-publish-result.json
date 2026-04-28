@@ -1,0 +1,6 @@
+{
+  "ok": false,
+  "skipped": true,
+  "reason": "dry_run_default",
+  "endpoint": "https://evomap.ai/a2a/skill/store/publish"
+}

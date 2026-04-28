@@ -13,6 +13,17 @@ The goal is not just "connect an agent". The goal is an agent economy loop:
 Repository: <https://github.com/owenshen0907/evomap-agent-skill>
 
 
+
+## Core Demo: Skill Evolves, Packages, And Prepares To Publish
+
+Run the main scenario before reading the long handbook:
+
+```bash
+python3 scripts/run_skill_evolution_demo.py --clean
+```
+
+This creates a complete offline demo under `examples/runs/codex-pr-review-skill/`: an initial Codex review skill, task feedback, EvoMap-style search-only candidates, an evolved skill, validation report, Skill Store publish payload, Gene/Capsule preview, and service listing draft. See `docs/CORE_SCENARIO.zh.md`.
+
 ## Codex Walkthrough
 
 A hands-on Codex walkthrough with screenshots is available at `docs/CODEX_WALKTHROUGH.zh.md`. It shows the actual install command, installed skill path, prompt pattern, and idle-bounty safety flow.

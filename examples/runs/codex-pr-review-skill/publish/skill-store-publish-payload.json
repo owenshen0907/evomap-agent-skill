@@ -1,0 +1,19 @@
+{
+  "sender_id": "node_demo_replace_with_real_node_id",
+  "skill_id": "skill_codex_pr_reviewer_git_safety",
+  "content": "---\nname: codex-pr-reviewer\ndescription: Review code changes for bugs, regressions, migration risk, missing tests, and git-safety issues. Use when Codex is asked to review a PR, diff, branch, migration, cleanup job, destructive change, or suspicious worktree state; prioritize findings with file/line references before summaries.\n---\n\n# Codex PR Reviewer\n\n## Goal\n\nFind actionable risks before summarizing the change. Protect the user's worktree and reputation by separating evidence, assumptions, and safe next actions.\n\n## Preflight\n\n1. Run `git status --short` and identify tracked, untracked, staged, and unrelated files.\n2. Inspect the diff relevant to the requested review; do not revert or overwrite unrelated user changes.\n3. If migrations, deletion jobs, data backfills, auth changes, billing changes, or destructive commands appear, mark the review as high-risk.\n4. Do not run destructive commands, production data operations, or networked publish actions without explicit confirmation.\n\n## Review Workflow\n\n1. Read changed files and tests before forming conclusions.\n2. List findings first, ordered by severity.\n3. Include tight file/line references when possible.\n4. For each finding, explain the user-visible failure mode, not just the code smell.\n5. Add a short testing gap section when validation is missing or too generic.\n6. Keep the final summary secondary and brief.\n\n## Migration And Destructive-Change Checks\n\n- Check whether deletes, drops, truncates, irreversible migrations, or cleanup jobs have rollback or dry-run paths.\n- Look for idempotency, batching, locks, timeouts, and observability on data changes.\n- Require fixture tests for data transformations and rollback/abort behavior when applicable.\n- If production data could be touched, ask for explicit environment and approval boundaries.\n\n## Output Contract\n\nUse this structure:\n\n```text\nFindings\n- [P1/P2/P3] File:line — issue, impact, and fix direction.\n\nOpen Questions\n- Only questions that change the review outcome.\n\nTesting Gaps\n- Concrete missing tests or commands.\n\nSummary\n- 1-3 lines after findings.\n```\n\n## Reference Checklist\n\nWhen the review involves migrations or destructive changes, load `references/review-checklist.md`.\n",
+  "category": "optimize",
+  "tags": [
+    "codex",
+    "code-review",
+    "git-safety",
+    "migration",
+    "skill-evolution"
+  ],
+  "bundled_files": [
+    {
+      "name": "references/review-checklist.md",
+      "content": "# Review Checklist\n\n## Git Safety\n\n- Run `git status --short` before reviewing.\n- Separate unrelated local changes from the review target.\n- Never run `git reset --hard`, `git checkout --`, destructive cleanup, or production-impacting commands without explicit user approval.\n\n## Findings First\n\n- Put bugs and regressions before summary.\n- Order by severity.\n- Use file/line references.\n- Explain impact and a concrete fix direction.\n\n## Migrations And Data Cleanup\n\n- Identify irreversible deletes, drops, truncates, and backfills.\n- Check rollback or abort strategy.\n- Check idempotency, batching, locks, and timeouts.\n- Require fixture tests for data transformations.\n- Ask for environment boundaries before any production-touching operation.\n"
+    }
+  ]
+}
