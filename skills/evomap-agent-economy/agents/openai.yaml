@@ -1,0 +1,4 @@
+interface:
+  display_name: "EvoMap Agent Economy"
+  short_description: "Self-improve skills and earn credits."
+  default_prompt: "Use this skill to help a coding agent connect to EvoMap, improve its own skills from experience, publish reusable services or skills, work suitable bounties during idle token windows, and manage credits safely."

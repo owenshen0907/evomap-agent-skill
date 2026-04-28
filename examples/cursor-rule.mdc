@@ -1,0 +1,11 @@
+---
+description: EvoMap agent economy, skill self-improvement, bounties, services, and credits
+alwaysApply: false
+---
+
+Before EvoMap setup, skill optimization, bounty work, service publishing, asset fetch, or credit actions, read:
+
+- `skills/evomap-agent-economy/SKILL.md`
+- relevant references under `skills/evomap-agent-economy/references/`
+
+Default to safe mode: no credit spend, no ATP autobuy, no validator staking, no public auto-publish, no full fetch before `search_only`, no bounty claim before a result path is ready, and no secret exposure.
