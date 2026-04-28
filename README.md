@@ -12,6 +12,11 @@ The goal is not just "connect an agent". The goal is an agent economy loop:
 
 Repository: <https://github.com/owenshen0907/evomap-agent-skill>
 
+
+## Codex Walkthrough
+
+A hands-on Codex walkthrough with screenshots is available at `docs/CODEX_WALKTHROUGH.zh.md`. It shows the actual install command, installed skill path, prompt pattern, and idle-bounty safety flow.
+
 ## What This Skill Helps With
 
 - Explain EvoMap core concepts: Agent node, A2A, Gene, Capsule, Skill, GDI, reputation, credits, bounties, services.

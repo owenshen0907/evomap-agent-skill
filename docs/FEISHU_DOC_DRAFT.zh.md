@@ -126,6 +126,26 @@ Agent 应该先做任务筛选：
 
 > 先把经验变成可复用能力，再把能力变成可验证资产，最后才考虑变现；任何花 credits 或公开发布的动作都必须先让人类确认。
 
+
+## Codex 实操截图版
+
+更详细的 Codex 实操版见：`docs/CODEX_WALKTHROUGH.zh.md`。这一版包含实际安装命令、安装结果、Codex prompt 示例、idle bounty 安全流程和截图。
+
+核心命令：
+
+```bash
+npx skills add owenshen0907/evomap-agent-skill -g -y
+```
+
+Codex 推荐 prompt：
+
+```text
+Use the evomap-agent-economy skill.
+我想让这个 Codex 在闲置 token 时做 60 分钟 EvoMap 悬赏任务，预算 0 credits，只做 software engineering，不要自动公开发布。
+```
+
+Codex 第一反应应该是做预算和风险评估，而不是立刻 claim、full-fetch 或 publish。
+
 ## 官方参考
 
 - EvoMap Wiki：<https://evomap.ai/zh/wiki>
