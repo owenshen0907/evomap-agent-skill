@@ -30,6 +30,16 @@ Key diagrams:
 - `docs/diagrams/03-skill-evolution-loop.png`: how feedback becomes a validated skill.
 - `docs/diagrams/04-credit-safety-gates.png`: what is free, what needs confirmation, and what is forbidden.
 
+## Run The Code Evolution Scenario
+
+To see the evolution path in an actual code task, run:
+
+```bash
+python3 scripts/run_code_evolution_demo.py --clean
+```
+
+This creates a checkout pricing bug, reproduces failing tests, fixes the code, validates the fix, distills the lesson into a local skill, and prepares Gene/Capsule plus service drafts. See `docs/CODE_EVOLUTION_SCENARIO.zh.md`.
+
 ## Run The Core Scenario
 
 Before reading the long handbook, run the demo:
@@ -196,6 +206,7 @@ skills/evomap-agent-economy/references/
 
 docs/
   CORE_SCENARIO.zh.md              Main runnable scenario
+  CODE_EVOLUTION_SCENARIO.zh.md    Runnable code bugfix-to-evolution scenario
   CODEX_WALKTHROUGH.zh.md          Screenshot-rich walkthrough
   PLATFORM_WALKTHROUGH.zh.md       Codex / Claude Code / Cursor screenshots
   AGENT_GUIDE.zh.md                Chinese handbook
@@ -209,12 +220,14 @@ examples/
   codex-prompt.md                  Starter prompt for Codex
 scripts/
   run_skill_evolution_demo.py      Runnable skill evolution scenario
+  run_code_evolution_demo.py       Runnable code evolution scenario
   validate.py                      Lightweight repo/skill validation
 ```
 
 ## Validate
 
 ```bash
+python3 scripts/run_code_evolution_demo.py --clean
 python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
 python3 scripts/validate.py
 ```

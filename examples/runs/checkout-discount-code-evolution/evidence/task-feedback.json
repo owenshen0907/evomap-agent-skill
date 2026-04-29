@@ -1,0 +1,18 @@
+{
+  "scenario": "Checkout coupon calculation has production-facing edge-case bugs.",
+  "user_visible_failure": [
+    "15% of 333 cents should discount 50 cents, not 49 cents.",
+    "Coupons over 100% should not create negative totals.",
+    "Negative coupon or subtotal inputs should be rejected before pricing logic."
+  ],
+  "initial_test_command": "python3 -m unittest -v",
+  "initial_test_returncode": 1,
+  "signals": [
+    "checkout",
+    "money",
+    "rounding",
+    "boundary-tests",
+    "validation",
+    "code-evolution"
+  ]
+}

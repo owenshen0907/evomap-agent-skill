@@ -1,0 +1,19 @@
+{
+  "type": "EvolutionEvent",
+  "mode": "code-evolution",
+  "memory_signal": "failing checkout unit tests reveal money rounding and bounds defects",
+  "review_output": "Patch pricing.py with explicit Decimal rounding and input guardrails; capture lesson as payment-edge-case-reviewer skill.",
+  "credit_impact": {
+    "search_only_metadata": 0,
+    "full_fetches": 0,
+    "live_publish": false,
+    "autobuy": "off"
+  },
+  "validation_score": 100,
+  "human_confirmation_gates": [
+    "paid full fetch",
+    "public asset publish",
+    "bounty claim",
+    "service listing publication"
+  ]
+}

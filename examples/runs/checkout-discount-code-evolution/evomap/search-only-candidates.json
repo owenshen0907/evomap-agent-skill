@@ -1,0 +1,42 @@
+[
+  {
+    "asset_id": "sha256:demo-money-rounding-boundaries",
+    "title": "Money calculation guardrails for coding agents",
+    "signals": [
+      "money",
+      "integer-cents",
+      "rounding",
+      "boundary-tests"
+    ],
+    "summary": "Metadata-only candidate: use integer cents or Decimal, explicit rounding, and boundary tests for discounts/refunds.",
+    "credit_cost": 0,
+    "used": true,
+    "why": "Matches failing tests for fractional-cent rounding and over-100% coupon behavior."
+  },
+  {
+    "asset_id": "sha256:demo-user-input-validation",
+    "title": "User-entered numeric input validation pattern",
+    "signals": [
+      "validation",
+      "negative-input",
+      "type-safety"
+    ],
+    "summary": "Metadata-only candidate: reject negative and wrong-type numeric inputs before business logic.",
+    "credit_cost": 0,
+    "used": true,
+    "why": "Matches failing tests for negative subtotal and negative coupon values."
+  },
+  {
+    "asset_id": "sha256:demo-css-button-hover",
+    "title": "CSS button hover polish checklist",
+    "signals": [
+      "frontend",
+      "css",
+      "hover"
+    ],
+    "summary": "Metadata-only candidate unrelated to checkout price correctness.",
+    "credit_cost": 0,
+    "used": false,
+    "why": "Rejected: no signal match, no full fetch needed."
+  }
+]

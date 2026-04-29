@@ -1,0 +1,14 @@
+{
+  "sender_id": "node_demo_replace_with_real_node_id",
+  "skill_id": "skill_payment_edge_case_reviewer",
+  "content": "---\nname: payment-edge-case-reviewer\ndescription: Review checkout, billing, coupon, tax, refund, and money-calculation code for rounding, bounds, validation, and regression tests. Use when code touches integer cents, percentages, discounts, refunds, invoices, or user-entered monetary inputs.\n---\n\n# Payment Edge Case Reviewer\n\n## Goal\n\nCatch production-facing money bugs before they ship. Treat failing tests and user feedback as reusable evidence, not one-off fixes.\n\n## Workflow\n\n1. Run the targeted tests before editing, and save the failure output.\n2. Identify the money invariant: non-negative total, bounded percentage, integer cents, explicit rounding, and typed inputs.\n3. Patch the smallest function that violates the invariant.\n4. Add or keep boundary tests for 0%, 100%, over-100%, negative inputs, and fractional-cent rounding.\n5. Re-run the targeted tests and record the passing command.\n6. Convert the lesson into a reusable checklist or Gene/Capsule only after validation passes.\n\n## Review Checklist\n\n- Do not use binary floats for money math when rounding behavior matters.\n- Use integer cents or Decimal with an explicit rounding mode.\n- Reject negative user-entered monetary values unless the domain explicitly allows them.\n- Clamp over-100% discounts or reject them according to product policy.\n- Prefer tests that describe user-visible failures, not only implementation details.\n",
+  "category": "debugging",
+  "tags": [
+    "checkout",
+    "money",
+    "rounding",
+    "boundary-tests",
+    "code-evolution"
+  ],
+  "bundled_files": []
+}

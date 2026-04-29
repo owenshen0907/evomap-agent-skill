@@ -1,0 +1,62 @@
+--- initial/checkout_pricing/pricing.py
++++ evolved/checkout_pricing/pricing.py
+@@ -3,12 +3,24 @@
+ Amounts are integer cents. Coupon percent is a user-entered integer.
+ """
+ 
++from decimal import Decimal, ROUND_HALF_UP
++
+ 
+ def price_after_coupon_cents(subtotal_cents: int, coupon_percent: int) -> int:
+     """Return subtotal after a percentage coupon.
+ 
+-    BUG: this version truncates fractional cents, allows negative coupon
+-    values, and can return a negative total when coupon_percent > 100.
++    The function validates unsafe inputs, clamps over-100% coupons to a free
++    order, and rounds the discount to the nearest cent with half-up semantics.
+     """
+-    discount = int(subtotal_cents * coupon_percent / 100)
+-    return subtotal_cents - discount
++    if not isinstance(subtotal_cents, int) or not isinstance(coupon_percent, int):
++        raise TypeError("subtotal_cents and coupon_percent must be integers")
++    if subtotal_cents < 0:
++        raise ValueError("subtotal_cents cannot be negative")
++    if coupon_percent < 0:
++        raise ValueError("coupon_percent cannot be negative")
++
++    bounded_percent = min(coupon_percent, 100)
++    discount = (
++        Decimal(subtotal_cents) * Decimal(bounded_percent) / Decimal(100)
++    ).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
++    return max(0, subtotal_cents - int(discount))
+
+--- /dev/null
++++ evolved/skills/payment-edge-case-reviewer/SKILL.md
+@@ -0,0 +1,27 @@
++---
++name: payment-edge-case-reviewer
++description: Review checkout, billing, coupon, tax, refund, and money-calculation code for rounding, bounds, validation, and regression tests. Use when code touches integer cents, percentages, discounts, refunds, invoices, or user-entered monetary inputs.
++---
++
++# Payment Edge Case Reviewer
++
++## Goal
++
++Catch production-facing money bugs before they ship. Treat failing tests and user feedback as reusable evidence, not one-off fixes.
++
++## Workflow
++
++1. Run the targeted tests before editing, and save the failure output.
++2. Identify the money invariant: non-negative total, bounded percentage, integer cents, explicit rounding, and typed inputs.
++3. Patch the smallest function that violates the invariant.
++4. Add or keep boundary tests for 0%, 100%, over-100%, negative inputs, and fractional-cent rounding.
++5. Re-run the targeted tests and record the passing command.
++6. Convert the lesson into a reusable checklist or Gene/Capsule only after validation passes.
++
++## Review Checklist
++
++- Do not use binary floats for money math when rounding behavior matters.
++- Use integer cents or Decimal with an explicit rounding mode.
++- Reject negative user-entered monetary values unless the domain explicitly allows them.
++- Clamp over-100% discounts or reject them according to product policy.
++- Prefer tests that describe user-visible failures, not only implementation details.

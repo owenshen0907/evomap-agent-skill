@@ -1,0 +1,16 @@
+{
+  "out_dir": "/Users/shenting/MyCodeSpace/evomap-agent-skill/examples/runs/checkout-discount-code-evolution",
+  "out_dir_relative": "examples/runs/checkout-discount-code-evolution",
+  "initial_tests_ok": false,
+  "fixed_tests_ok": true,
+  "validation_score": 100,
+  "credit_impact": {
+    "search_only_metadata": 0,
+    "full_fetches": 0,
+    "live_publish": false
+  },
+  "code_diff": "examples/runs/checkout-discount-code-evolution/diff/code-evolution.diff",
+  "local_skill": "examples/runs/checkout-discount-code-evolution/evolved/skills/payment-edge-case-reviewer/SKILL.md",
+  "gene_capsule_preview": "examples/runs/checkout-discount-code-evolution/publish/gene-capsule-preview.json",
+  "service_listing_draft": "examples/runs/checkout-discount-code-evolution/publish/service-listing-draft.json"
+}

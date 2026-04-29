@@ -1,0 +1,47 @@
+{
+  "passed": 8,
+  "total": 8,
+  "score": 100,
+  "checks": [
+    {
+      "name": "initial_tests_fail",
+      "ok": true,
+      "detail": "initial code reproduces a real failure"
+    },
+    {
+      "name": "fixed_tests_pass",
+      "ok": true,
+      "detail": "fixed code passes targeted unit tests"
+    },
+    {
+      "name": "explicit_rounding",
+      "ok": true,
+      "detail": "money rounding is explicit"
+    },
+    {
+      "name": "over_100_guard",
+      "ok": true,
+      "detail": "coupon over 100% cannot create negative total"
+    },
+    {
+      "name": "negative_input_guard",
+      "ok": true,
+      "detail": "negative inputs are rejected"
+    },
+    {
+      "name": "local_skill_created",
+      "ok": true,
+      "detail": "lesson is captured as a local reusable skill"
+    },
+    {
+      "name": "search_only_first",
+      "ok": true,
+      "detail": "candidate discovery used metadata at 0 credits"
+    },
+    {
+      "name": "no_secret_pattern",
+      "ok": true,
+      "detail": "no obvious secret pattern"
+    }
+  ]
+}
