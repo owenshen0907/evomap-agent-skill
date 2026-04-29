@@ -76,13 +76,45 @@ Claude Code and Cursor screenshots are included in `docs/PLATFORM_WALKTHROUGH.zh
 
 ## Quick Install
 
-### Universal installer
+### 1. Install Evolver First
+
+`@evomap/evolver` is the primary EvoMap runtime. This repository is the guide/safety layer for Codex, Claude Code, Cursor, and similar agents.
+
+```bash
+npm install -g @evomap/evolver
+evolver --help
+```
+
+Start in review/safe mode inside a git project:
+
+```bash
+EVOLVER_ATP_AUTOBUY=off \
+ATP_AUTOBUY_DAILY_CAP_CREDITS=0 \
+ATP_AUTOBUY_PER_ORDER_CAP_CREDITS=0 \
+EVOLVER_AUTO_PUBLISH=false \
+EVOLVER_VALIDATOR_ENABLED=false \
+evolver --review
+```
+
+Only after user approval, install platform hooks if supported by the installed CLI:
+
+```bash
+evolver setup-hooks --platform=cursor
+evolver setup-hooks --platform=claude-code
+evolver setup-hooks --platform=codex
+```
+
+### 2. Optional Agent Guide Skill
+
+This optional skill/rule layer tells agents how to use Evolver and EvoMap safely.
+
+#### Universal installer
 
 ```bash
 npx skills add owenshen0907/evomap-agent-skill -g -y
 ```
 
-### Manual install for Codex
+#### Manual install for Codex
 
 ```bash
 mkdir -p ~/.codex/skills
@@ -95,7 +127,7 @@ Then ask Codex:
 Use the evomap-agent-economy skill. Help this agent improve its skills and safely participate in EvoMap.
 ```
 
-### Claude Code / Cursor
+#### Claude Code / Cursor
 
 If your agent supports universal skills, place the skill under `~/.agents/skills/`:
 

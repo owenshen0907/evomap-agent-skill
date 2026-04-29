@@ -23,7 +23,7 @@
 
 这张图要看四件事：
 
-- **安装 Skill**：Codex、Claude Code、Cursor 先加载同一套 `evomap-agent-economy` 行为规则。
+- **安装 Evolver**：先接入 `@evomap/evolver`；本项目的 Skill / Rule 只是给 Codex、Claude Code、Cursor 的使用指引和安全边界。
 - **做真实任务**：失败反馈、成功步骤、验证命令会被当成“演化证据”。
 - **能力变强**：agent 更新本地 skill，并通过验证；用户看到的是下一次行为更稳。
 - **可选发布/接单**：只有用户确认后，才把能力发布到 EvoMap 或去做匹配悬赏赚 credits。
@@ -293,7 +293,7 @@ sed -n '1,42p' ~/.agents/skills/evomap-agent-economy/SKILL.md
 
 ![Codex prompt 示例](screenshots/codex-walkthrough/04-codex-prompt.png)
 
-这个 prompt 的关键是：先跑 demo，再解释，不允许自动花 credits、full-fetch、claim、publish 或暴露 `node_secret`。
+这个 prompt 的关键是：先把 `@evomap/evolver` 当作主运行时，先 `evolver --help` / `evolver --review` 做安全检查；只有当前仓库确实包含 demo 脚本时，才运行本项目的 `--publish-dry-run` 示例。
 
 ## 12. Claude Code 接入截图与解释
 
@@ -313,10 +313,10 @@ cp examples/CLAUDE.md CLAUDE.md
 
 这张截图要看：
 
-- `CLAUDE.md` 告诉 Claude Code 什么时候读取 EvoMap skill。
-- 它要求先运行 `--publish-dry-run` demo。
-- 它把解释顺序固定为“用户视角优先”。
-- 它明确禁止泄露密钥、自动花 credits、自动发布或接悬赏。
+- `CLAUDE.md` 先说明 `@evomap/evolver` 才是主运行时。
+- 它要求先 `evolver --help`，再用 `evolver --review` 安全试运行。
+- 它明确 demo 脚本只在当前仓库存在时才运行，不能假设每个项目都有。
+- 它把解释顺序固定为“用户视角优先”，并禁止泄露密钥、自动花 credits、自动发布或接悬赏。
 
 Claude Code 推荐 prompt：
 
@@ -338,15 +338,16 @@ cp examples/cursor-rule.mdc .cursor/rules/evomap-agent-economy.mdc
 这张截图要看：
 
 - `alwaysApply: false`：不是所有任务都强行套用，只在 EvoMap、skill、自优化、credits、悬赏、服务等场景启用。
-- rule 要求先跑核心 demo。
-- rule 要求先从用户视角解释结果。
+- rule 先说明 `@evomap/evolver` 才是主运行时，这个 rule 只是 Cursor 的安全使用层。
+- rule 要求先 `evolver --help`，再用 `evolver --review` 安全试运行。
+- rule 明确不能假设 `scripts/run_skill_evolution_demo.py` 存在；只有当前仓库是本示例项目或脚本存在时才运行 demo。
 - rule 默认禁止花 credits、autobuy、validator、public auto-publish、未 search_only 就 full-fetch、没有结果路径就 claim。
 
 Cursor Agent 推荐 prompt：
 
 ![Cursor prompt 示例](screenshots/cursor/02-cursor-prompt.png)
 
-这张截图的重点是：Cursor 里也可以复用同一套核心逻辑，先跑 demo，再解释演化差异、积分节省、验证意义和服务卡设计。
+这张截图的重点是：Cursor 里也可以复用同一套安全逻辑，但主入口应是 Evolver；demo 只是本仓库的教学样例，不能当成所有项目的默认命令。
 
 ## 14. 锦上添花能力：核心演示之后再讲
 

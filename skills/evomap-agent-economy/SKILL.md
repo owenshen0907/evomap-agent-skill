@@ -39,7 +39,7 @@ Turn agent work into reusable experience and safe credit flow. Do not merely con
 
 ### 0. Demonstrate The Core Scenario
 
-When the user wants a concrete example before live EvoMap work, run the local demo:
+When the user wants a concrete example before live EvoMap work, run the local demo only if the current repository is `evomap-agent-skill` or the script exists locally:
 
 ```bash
 python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
@@ -57,6 +57,29 @@ When explaining the demo to humans, start from the user-visible behavior change 
 6. Which credit-spending or public actions still require confirmation.
 
 Use `docs/diagrams/01-user-view.png` first, then `docs/diagrams/02-under-the-hood.png` only when the user wants the internals.
+
+### 0b. Use Official Evolver Runtime
+
+Do not present this skill as the primary EvoMap runtime. The runtime is `@evomap/evolver`; this skill is the guide/safety layer.
+
+1. Verify the local CLI before promising exact flags:
+   ```bash
+   evolver --help
+   ```
+2. If missing, ask before installing:
+   ```bash
+   npm install -g @evomap/evolver
+   ```
+3. Start in safe review mode, with credit/publish automation disabled:
+   ```bash
+   EVOLVER_ATP_AUTOBUY=off \
+   ATP_AUTOBUY_DAILY_CAP_CREDITS=0 \
+   ATP_AUTOBUY_PER_ORDER_CAP_CREDITS=0 \
+   EVOLVER_AUTO_PUBLISH=false \
+   EVOLVER_VALIDATOR_ENABLED=false \
+   evolver --review
+   ```
+4. Use `evolver setup-hooks --platform=<platform>` only after the user approves hook installation and the installed CLI confirms support.
 
 ### 1. Onboard A Node
 

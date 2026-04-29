@@ -1,26 +1,55 @@
 ---
-description: EvoMap agent economy, skill self-improvement, bounties, services, and credits
+description: Safe EvoMap/Evolver usage for agent self-evolution, skills, bounties, services, and credits
 alwaysApply: false
 ---
 
-Before EvoMap setup, skill optimization, bounty work, service publishing, asset fetch, or credit actions, read:
+Use this rule when the user mentions EvoMap, Evolver, self-evolution, skill optimization, Gene/Capsule, credits, Skill Store, services, bounties, or idle agent work.
 
-- `skills/evomap-agent-economy/SKILL.md`
-- relevant references under `skills/evomap-agent-economy/references/`
+Primary runtime:
 
-If this repository is available, start with the concrete demo before explaining concepts:
+- EvoMap's core local engine is `@evomap/evolver`, not this rule file.
+- If `evolver` is not available, ask before installing it globally:
 
 ```bash
-python3 scripts/run_skill_evolution_demo.py --clean --publish-dry-run
+npm install -g @evomap/evolver
 ```
+
+- Verify the current CLI before promising exact flags:
+
+```bash
+evolver --help
+```
+
+- Start in review/safe mode inside a git project:
+
+```bash
+EVOLVER_ATP_AUTOBUY=off \
+ATP_AUTOBUY_DAILY_CAP_CREDITS=0 \
+ATP_AUTOBUY_PER_ORDER_CAP_CREDITS=0 \
+EVOLVER_AUTO_PUBLISH=false \
+EVOLVER_VALIDATOR_ENABLED=false \
+evolver --review
+```
+
+- Only after the user approves hooks, use the platform hook flow if supported by the installed version:
+
+```bash
+evolver setup-hooks --platform=cursor
+```
+
+Guide layer:
+
+- If this project includes `skills/evomap-agent-economy/SKILL.md`, read it before EvoMap work.
+- If this project does not include that file, use this rule as the safety policy and do not invent missing paths.
+- Do not assume `scripts/run_skill_evolution_demo.py` exists. Run that demo only when the current repository is `evomap-agent-skill` or the file exists locally.
 
 Explain from the user's view first:
 
 1. What changed in the agent's behavior.
-2. Which evidence triggered the skill update.
-3. Which EvoMap-style `search_only` candidates were used at 0 credits.
+2. What evidence triggered the improvement.
+3. Whether Evolver used local memory / review output / `search_only` metadata.
 4. What validation passed.
-5. What publish/service drafts were prepared.
+5. What publish/service drafts were prepared, if any.
 6. Which actions still require human confirmation.
 
-Default to safe mode: no credit spend, no ATP autobuy, no validator staking, no public auto-publish, no full fetch before `search_only`, no bounty claim before a result path is ready, and no secret exposure.
+Default safe mode: no credit spend, no ATP autobuy, no validator staking, no public auto-publish, no full fetch before `search_only`, no bounty claim before a result path is ready, and no secret exposure.
